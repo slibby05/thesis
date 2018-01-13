@@ -1,0 +1,247 @@
+
+There are a lot of types of optimizations, So I'm going to try to group them together
+
+----------------------------------------------------------------------------
+Low level optimizations
+----------------------------------------------------------------------------
+These are probably too low level to be useful.  Ghc, Prolog, and LLVM will all do them
+
+Instruction selection:
+Find The optimal instructions for an opperation
+x <- a + 1
+
+is 
+
+inc %rax
+
+instead of
+
+movl $4, %ecx
+addl %ecx, %eax
+
+----------------------------------------------------------------------------
+reduction in strength:
+use faster, equivalent, instructions
+
+x <- a / 2
+
+is 
+
+ishl 1, %rax
+
+instead of
+
+idiv 2, %rax
+
+----------------------------------------------------------------------------
+register allocation:
+optimally decide which registers to allocate for variables
+
+----------------------------------------------------------------------------
+Optimizations that actually do something useful
+----------------------------------------------------------------------------
+
+constant folding:
+replace constant expressions with their value
+
+let x = 4 + 7
+
+becomes
+
+let x = 11
+
+----------------------------------------------------------------------------
+constant propogation: 
+if all of the variables in an expression are constant (or known), 
+repleace the variables with their value.
+This works well with constant folding
+
+let x = 4
+    y = x + 3
+
+becomes
+
+let x = 4
+    y = 4 + 3
+
+----------------------------------------------------------------------------
+common sub expression elimination: 
+if two different variables have the same expression, only compute it once
+
+let x = a + b
+    y = a + b
+
+becomes
+
+let x = a + b
+    y = x
+
+
+----------------------------------------------------------------------------
+dead code elimination:
+If a variable is never used, remove it
+
+let x = 4
+    d = expensive x
+    in x
+
+becomes
+
+let x = 4
+    int x
+
+----------------------------------------------------------------------------
+Unnesting lets:
+put all lets on the same level
+
+let x = let y = 5
+        in y + 6
+    in x + 8
+
+becomes
+
+let y = 5
+    x = y + 6
+    in x + 8
+
+
+----------------------------------------------------------------------------
+Tail call optimization:
+replace any tail calls with jumps
+
+f x = if x then g 1
+           else h 1
+
+is compiled to
+
+f:
+  push 1
+  cjump x g
+  jump h
+
+----------------------------------------------------------------------------
+code motion: (this may not apply to a lazy language)
+move constant expressions outside of loops
+
+while x < 100:
+    i = 2 * 4
+    ...
+
+becomes
+
+i = 2*4
+while x < 100:
+    ...
+
+
+----------------------------------------------------------------------------
+invariant hoisting:
+precompute invariants in functions
+If the function is called more than once, then the invariant won't be re-executed
+
+let g = (ackermann 100) + 2
+    in g
+
+becomes
+let a = ackarmann 100
+    g = a + 2
+    in g
+
+
+----------------------------------------------------------------------------
+deforestation:
+remove intermediate datastructures when we can
+
+let square [] = []
+    square (x:xs) = x*x : square xs
+
+    sum [] = 0
+    sum (x:xs) = 1 + sum xs
+
+    in sum (square [1..100])
+
+becomes
+
+let sumSquare [] = 0
+    sumSquare (x:xs) = x * x + sumSquare xs
+
+    in sumSquare [1..100]
+
+----------------------------------------------------------------------------
+induction variable reduction:
+replace code for induction variables with faster, equivalent code
+
+for(int i = 0; i < n; i++)
+{
+    sum += a[4*i];
+}
+
+becomes
+
+for(int m = 0; m < 4*n; m = m + 4)
+{
+    sum += *a + m;
+}
+
+----------------------------------------------------------------------------
+optimizations for other optimizations
+----------------------------------------------------------------------------
+These optimizations are largely pointless on their own,
+but they increase the amount of code other optimizations have to work with.
+These end up being really important.
+
+----------------------------------------------------------------------------
+loop unrolling:
+duplicate the body of a loop
+I know curry doesn't have loops, but with tail call optimizations
+and data flow analysis, we can turn some functions into loops.
+
+for(int x = 1; x < 100; x++)
+{
+    sum = sum + a[x];
+}
+
+becomes
+
+for(int x = 1; x < 100; x+=2)
+{
+    sum = sum + a[x];
+    sum = sum + a[x+1];
+}
+
+----------------------------------------------------------------------------
+function inlining: (or beta expansion, or inline expansion)
+replace a function call with the body of a function
+
+f = x + x
+
+main = print (f 100)
+
+becomes
+
+f = x + x
+
+main = print (100 + 100)
+
+Now, constant propogation can replace 100 + 100 with 200,
+and dead code elimination can remove f
+
+----------------------------------------------------------------------------
+types of analysisanalysis
+----------------------------------------------------------------------------
+Strictnexx analysis:
+determine if an argument is strict
+
+liveness analysis:
+determine of a variable is ever used again
+
+dataflow analysis: (several types) 
+determine what value a variable has in a program
+
+alias analysis: (probably not relavant)
+determine what pointers are pointing too, and when 2 overlap
+
+induction variable analysis:
+determin induction variables for loops
+
+
