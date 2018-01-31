@@ -1,0 +1,60 @@
+
+\documentclass{article}
+\begin{document}
+
+\begin{abstract}
+\end{abstract}
+
+\section{introduction}
+\section{Need for an optimizaing compiler}
+\section{Curry Semantics}
+\section{functional compilers}
+\subsection{CEK}
+\subsection{SECD}
+\subsection{TIM}
+\subsection{g-machine}
+\subsection{STG}
+\section{logic compilers}
+\subsection{prolog}
+\subsection{Oz}
+\subsection{KL1}
+\section{functional logic compilers}
+\subsection{Toy}
+\subsection{Curry: Pakcs}
+\subsection{Curry: Kics2}
+\subsection{Curry: Sprite}
+\section{Compiling Curry}
+\subsection{current curry compilation}
+\subsection{graph rewriting vs graph reduction}
+\subsection{proposed curry compilation}
+\begin{itemize}
+  \item intermediate representation: flatcurry
+  \item intermediate representation: icurry?
+  \item intermediate representation: A-curry?
+\end{itemize}
+\section{Optimizations}
+\subsection{goals}
+\begin{itemize}
+  \item apply traditional optimizations
+  \item remove memory allocations
+  \item remove memory accesses
+\end{itemize}
+\subsection{problems with traditional optimizations}
+\begin{itemize}
+  \item textual replacement is a bad idea
+  \item $\beta$-reduction isn't safe
+  \item most optimizations are probably pointless
+\end{itemize}
+\subsection{curry specific optimizations}
+\section{deliverables}
+\begin{itemize}
+  \item an optimizing curry compiler, from source (or flat-curry) to executable code.
+  \item justification for the correctness of optimizations
+  \item evaluation against current curry compilers
+  \begin{itemize}
+    \item determine runtime/memory usage on ``real world'' programs
+    \item test on multiple machines/environments
+  \end{itemize}
+\end{itemize}
+\section{Conclusion}
+\end{document}
