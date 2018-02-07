@@ -6,36 +6,82 @@
 \end{abstract}
 
 \section{introduction}
+\section{Curry Language}
+\begin{itemize}
+    \item Graph rewriting
+    \item non-determinism
+    \item free variables
+    \item extensions
+\end{itemize}
 \section{Need for an optimizaing compiler}
-\section{Curry Semantics}
+\begin{itemize}
+    \item Pakcs and determinstic programs
+    \item Kics2 and non-deterministic programs
+\end{itemize}
 \section{functional compilers}
-\subsection{CEK}
-\subsection{SECD}
-\subsection{TIM}
-\subsection{g-machine}
-\subsection{STG}
+\subsection{history}
+\begin{itemize}
+    \item CEK
+    \item SECD
+    \item TIM
+    \item g-machine
+    \item STG
+\end{itemize}
+\subsection{modern functional compilers}
+\begin{itemize}
+    \item representation of programs
+    \item graph reduction
+\end{itemize}
 \section{logic compilers}
-\subsection{prolog}
-\subsection{Oz}
-\subsection{KL1}
+\subsection{history}
+\begin{itemize}
+  \item prolog
+  \item Oz
+  \item Mercury
+  \item KL1
+\end{itemize}
+\subsection{optimizations}
 \section{functional logic compilers}
-\subsection{Toy}
+\subsection{history}
+\begin{itemize}
+  \item ALF
+  \item Babel
+  \item K-Leaf
+  \item LIFE
+  \item Toy
+\end{itemize}
 \subsection{Curry: Pakcs}
 \subsection{Curry: Kics2}
 \subsection{Curry: Sprite}
 \section{Compiling Curry}
+\subsection{Curry evaluation model}
+\begin{itemize}
+  \item Pakcs: non-determinism through backtracking
+  \item Kics2: non-determinism through pull-tabbing
+  \item Sprite: complete pull-tabbing
+\end{itemize}
 \subsection{current curry compilation}
+\begin{itemize}
+  \item compilers vs interpreters
+\end{itemize}
 \subsection{graph rewriting vs graph reduction}
+\begin{itemize}
+  \item Pakcs and graph rewriting
+  \item GHC and graph reduction
+\end{itemize}
+\subsection{non-determinism vs free variables}
 \subsection{proposed curry compilation}
 \begin{itemize}
+  \item simple compilation
+  \item backtracking
   \item intermediate representation: flatcurry
   \item intermediate representation: icurry?
   \item intermediate representation: A-curry?
 \end{itemize}
 \section{Optimizations}
-\subsection{goals}
+\subsection{possible optimizations}
 \begin{itemize}
-  \item apply traditional optimizations
+  \item traditional optimizations
   \item remove memory allocations
   \item remove memory accesses
 \end{itemize}
@@ -43,9 +89,19 @@
 \begin{itemize}
   \item textual replacement is a bad idea
   \item $\beta$-reduction isn't safe
+  \begin{itemize}
+      \item coin example
+  \end{itemize}
   \item most optimizations are probably pointless
 \end{itemize}
-\subsection{curry specific optimizations}
+\subsection{goals}
+\begin{itemize}
+    \item Picking optimizations that might actually help
+    \item deforrestation
+    \item shortcutting
+    \item unboxing
+    \item all optimizations apply to all non-determinism strategies
+\end{itemize}
 \section{deliverables}
 \begin{itemize}
   \item an optimizing curry compiler, from source (or flat-curry) to executable code.
