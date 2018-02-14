@@ -28,7 +28,7 @@
   institution = {IMAG},
   year        = {1997},
   number      = {985-I},
-  note        = {Available at \url{ftp://ftp.imag.fr/pub/labo-LEIBNIZ/OLD-archives/PMP/c-graph-rewriting.ps.gz}},
+  note        = {Available at ftp://ftp.imag.fr/pub/labo-LEIBNIZ/OLD-archives/PMP/c-graph-rewriting.ps.gz},
 }
 
 % I'll probably need this at some point too
@@ -77,22 +77,22 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-@article{AntoyHanus10CACM
-  ,author={S. Antoy and M. Hanus}
-  ,title={Functional Logic Programming}
-  ,journal={Comm. of the ACM}
-  ,volume={53}
-  ,number={4}
-  ,year={2010}
-  ,month={April}
-  ,pages={74-85}
+@article{AntoyHanus10CACM,
+   author={S. Antoy and M. Hanus},
+   title={Functional Logic Programming},
+   journal={Comm. of the ACM},
+   volume={53},
+   number={4},
+   year={2010},
+   month={April},
+   pages={74-85}
 }
 
 
 @Misc{AntoyHanus17tutorial,
   author       = {S. Antoy and M. Hanus},
   title        = {{Curry}: A {Tutorial} {Introduction}},
-  howpublished = {Available at \url{http://www-ps.informatik.uni-kiel.de/currywiki/documentation/tutorial}},
+  note         = {Available at http://www-ps.informatik.uni-kiel.de/currywiki/documentation/tutorial},
   year         = {January 13, 2017}
 }
 
@@ -109,7 +109,7 @@
 @Misc{Hanus16Curry,
   author       = {Hanus (ed.), M.},
   title        = {Curry: An Integrated Functional Logic Language (Vers.\ 0.9.0)},
-  howpublished = {Available at \url{http://www.curry-language.org}},
+  note         = {Available at http://www.curry-language.org},
   year         = {2016},
 }
 
@@ -182,7 +182,7 @@
   address   = {Southampton, UK},
   month     = sep,
   publisher = {Springer LNCS 1298},
-  note      = {Extended version at \url{http://cs.pdx.edu/~antoy/homepage/publications/alp97/full.pdf}},
+  note      = {Extended version at http://cs.pdx.edu/~antoy/homepage/publications/alp97/full.pdf},
 }
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -202,7 +202,7 @@
   title  = {{The Muenster Curry Compiler}},
   year   = {2012},
   editor = {W. Lux},
-  note   = {Available at \url{http://danae.uni-muenster.de/~lux/curry/}},
+  note   = {Available at http://danae.uni-muenster.de/~lux/curry/},
 }
 
 @Article{AntoyJost16LOPSTR,
@@ -220,7 +220,7 @@
 @Misc{Hanus17PAKCS,
   author       = {Hanus (ed.), M.},
   title        = {{PAKCS} 1.14.3: {The Portland Aachen Kiel Curry System}},
-  howpublished = {Available at \url{http://www.informatik.uni-kiel.de/~pakcs}},
+  note         = {Available at http://www.informatik.uni-kiel.de/~pakcs},
   year         = {March 04, 2017},
 }
 
@@ -309,7 +309,7 @@
  address = {New York, NY, USA},
 } 
 
-@inproceedings{opbit,
+@inproceedings{orbit,
  author = {Adams, Norman and Kranz, David and Kelsey, Richard and Rees, Jonathan and Hudak, Paul and Philbin, James},
  title = {ORBIT: An Optimizing Compiler for Scheme},
  booktitle = {Proceedings of the 1986 SIGPLAN Symposium on Compiler Construction},
@@ -382,7 +382,7 @@
 } 
 
 % used SSA for several optimizations
-@article{Wegman:1991:CPC:103135.103136,
+@article{ssa_Wegman,
  author = {Wegman, Mark N. and Zadeck, F. Kenneth},
  title = {Constant Propagation with Conditional Branches},
  journal = {ACM Trans. Program. Lang. Syst.},
@@ -415,7 +415,7 @@ isbn = {0-8186-5060-5}
 % early use of CPS as an IR
 @phdthesis{steele78,
    author = {Guy Lewis Steele, Jr},
-   title = {RABBIT: A Compiler for SCHEME}
+   title = {RABBIT: A Compiler for SCHEME},
    institution = {Masters Thesis. MIT AI Lab. AI Lab Technical Report AITR-474}, 
    month =May,
    year = 1978
@@ -458,6 +458,87 @@ isbn = {0-8186-5060-5}
  numpages = {11},
  url = {http://doi.acm.org/10.1145/155090.155113},
 } 
+
+% Lambda the ultimate papers
+
+@article{ultimate_imparative,
+    author = { Guy Lewis Steele, Jr. and Gerald Jay Sussman},
+    title = {Lambda: The Ultimate Imperative},
+    publisher = {MIT AI Lab},
+    year = 1976,
+    month = march,
+}
+@article{ultimate_declaritive,
+    author = {Guy Lewis Steele, Jr.},
+    title = {Lambda: The Ultimate Declarative},
+    publisher = {MIT AI Lab},
+    year = 1976,
+    month = November,
+}
+@article{lambda_rename_steel,
+    author = {Guy Lewis Steele, Jr.},
+    title = {Compiler Optimization Based on Viewing LAMBDA as RENAME + GOTO},
+    year = 1980,
+    publisher = {MIT AI Lab},
+}
+@article{lambda_goto,
+    author = {Guy Lewis Steele, Jr.},
+    title = {Debunking the "Expensive Procedure Call" Myth, or Procedure Call Implementations Considered Harmful, or LAMBDA, the Ultimate GOTO"},
+    journal = {ACM Conference Proceedings. 1977},
+    year = 1977,
+}
+
+@article{deforestation_wadler,
+title = "Deforestation: transforming programs to eliminate trees",
+journal = "Theoretical Computer Science",
+volume = "73",
+number = "2",
+pages = "231 - 248",
+year = "1990",
+issn = "0304-3975",
+doi = "https://doi.org/10.1016/0304-3975(90)90147-A",
+url = "http://www.sciencedirect.com/science/article/pii/030439759090147A",
+author = "Philip Wadler"
+}
+
+@inproceedings{shortcut_deforestation,
+ author = {Gill, Andrew and Launchbury, John and Peyton Jones, Simon L.},
+ title = {A Short Cut to Deforestation},
+ booktitle = {Proceedings of the Conference on Functional Programming Languages and Computer Architecture},
+ series = {FPCA '93},
+ year = {1993},
+ isbn = {0-89791-595-X},
+ location = {Copenhagen, Denmark},
+ pages = {223--232},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/165180.165214},
+ doi = {10.1145/165180.165214},
+ acmid = {165214},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+@article{haskell_inliner,
+ author = {Peyton Jones, Simon and Marlow, Simon},
+ title = {Secrets of the Glasgow Haskell Compiler Inliner},
+ journal = {J. Funct. Program.},
+ issue_date = {July 2002},
+ volume = {12},
+ number = {5},
+ month = jul,
+ year = {2002},
+ issn = {0956-7968},
+ pages = {393--434},
+ numpages = {42},
+ url = {http://dx.doi.org/10.1017/S0956796802004331},
+ doi = {10.1017/S0956796802004331},
+ acmid = {968422},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+} 
+
+% TODO: add deforestation (Wadler) and secrets of the ghc inliner (I think?) (SPJ)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % curry specific optimizations
@@ -471,6 +552,23 @@ isbn = {0-8186-5060-5}
     year = 2016,
 }
 
+@inproceedings{offline_peval_Ramos,
+ author = {Ramos, J. Guadalupe and Silva, Josep and Vidal, Germ\'{a}n},
+ title = {An Offline Partial Evaluator for Curry Programs},
+ booktitle = {Proceedings of the 2005 ACM SIGPLAN Workshop on Curry and Functional Logic Programming},
+ series = {WCFLP '05},
+ year = {2005},
+ isbn = {1-59593-069-8},
+ location = {Tallinn, Estonia},
+ pages = {49--53},
+ numpages = {5},
+ url = {http://doi.acm.org/10.1145/1085099.1085109},
+ doi = {10.1145/1085099.1085109},
+ acmid = {1085109},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {narrowing, offline partial evaluation},
+} 
 
 
 

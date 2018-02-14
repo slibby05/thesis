@@ -37,7 +37,7 @@ Here \texttt{ys} is a free variable, and it has two constraints:
 \texttt{ys} must be a permutation of \texttt{xs}, and \texttt{ys} must be sorted.
 
 Free variables are given concrete values in Curry programs via narrowing.
-The semantics of narrowing and non-determinism in Curry are given in \cite{}.
+The semantics of narrowing and non-determinism in Curry are given in \cite{Hanus16Curry, AntoyHanus06ICLP}.
 
 There are currently two mature Curry compilers, Pakcs and Kics2.
 Pakcs compiles Curry to Prolog in an effort to leverage Prolog's non-determinism and free variables.
@@ -63,7 +63,8 @@ This means that any non-deterministic expression cannot be optimized in Kics2.
 Finally since LLVM doesn't know about either higher order functions or non-determinism it loses many easy opprotunities for optimization.
 
 Curry programs have one last hope for efficient execution.
-Recently, many scientists \cite{} have developed a strong theory of partial evaluation for functional logic programs.
+Recently, many scientists \cite{peval_bjorn, offline_peval_Ramos} 
+have developed a strong theory of partial evaluation for functional logic programs.
 While these results are interesting, partial evaluation is not currently automatic in Curry.
 Guidance is required from the programmer to run the optimization.
 Furthermore the optimization fails to optimize several common programs.
@@ -74,7 +75,11 @@ The purpose of this proposal is, first, to make a case that Pakcs, Kics2, and pa
 of optimizing Curry programs, then to propose a new solution of building optimization into the Curry compiler pipeline.
 
 This may seem trivial at first.  After all, optimization has been studied heavily for decades, and there are many well understood
-optimizations for imperative, functional, and logic programming. \cite{}
+optimizations for imperative, functional, and logic programming. 
+\cite{optminzation_allen, dataflow_allen, LowryMedlock69, dataflow_kildall,
+AhoUllman77, continuations_appel, compilers_appel, orbit, ssa_alpern, ssa_Wegman, ssa_wolfe,
+steele78, stg-peytonJones, anormal_Flanagan, lambda_rename_steel, lambda_goto,
+deforestation_wadler, shortcut_deforestation, haskell_inliner}
 Why don't I just use these optimizations in Curry?
 Ideally I can, but it's not immediately clear that these optimizations are valid in Curry.
 One aspect of this dissertation is to implement these optimizations in Curry,
