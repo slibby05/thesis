@@ -1,0 +1,335 @@
+
+There are a lot of types of optimizations, So I'm going to try to group them together
+
+----------------------------------------------------------------------------
+Low level optimizations
+----------------------------------------------------------------------------
+These are probably too low level to be useful.  Ghc, Prolog, and LLVM will all do them
+On the plus side they are all trivially safe with non-determinism
+
+Instruction selection:
+Find The optimal instructions for an opperation
+x <- a + 1
+
+is 
+
+inc %rax
+
+instead of
+
+movl $4, %ecx
+addl %ecx, %eax
+
+----------------------------------------------------------------------------
+reduction in strength:
+use faster, equivalent, instructions
+
+x <- a / 2
+
+is 
+
+ishl 1, %rax
+
+instead of
+
+idiv 2, %rax
+
+----------------------------------------------------------------------------
+register allocation:
+optimally decide which registers to allocate for variables
+
+----------------------------------------------------------------------------
+Optimizations that actually do something useful
+----------------------------------------------------------------------------
+
+constant folding:
+replace constant expressions with their value
+
+let x = 4 + 7
+
+becomes
+
+let x = 11
+
+Analysis:
+This is also going to be safe with non-determinism
+We can do anything about 
+x <- 3 ? 5
+because that will have to return two different answers,
+but any deterministic constant expression is safe to reduce.
+
+----------------------------------------------------------------------------
+constant propogation: 
+if all of the variables in an expression are constant (or known), 
+repleace the variables with their value.
+This works well with constant folding
+
+let x = 4
+    y = x + 3
+
+becomes
+
+let x = 4
+    y = 4 + 3
+
+analysis
+again, since the variable has to be constant (and by extension, deterministic)
+It's trivially safe for non-determinism.
+
+
+----------------------------------------------------------------------------
+common sub expression elimination: 
+if two different variables have the same expression, only compute it once
+
+let x = a + b
+    y = a + b
+
+becomes
+
+let x = a + b
+    y = x
+
+analysis:
+I'm not really sure, but I'm leaning towards yes.
+This should be true as long as curry is gaurenteed to be referentially transparent
+
+----------------------------------------------------------------------------
+dead code elimination:
+If a variable is never used, remove it
+
+let x = 4
+    d = expensive x
+    in x
+
+becomes
+
+let x = 4
+    int x
+
+analysis
+trivially ok.  If we will never execute code, then it doesn't matter if it's non-deterministic
+
+----------------------------------------------------------------------------
+Unnesting lets:
+put all lets on the same level
+
+let x = let y = 5
+        in y + 6
+    in x + 8
+
+becomes
+
+let y = 5
+    x = y + 6
+    in x + 8
+
+analysis:
+Since curry is lazy, the only effect of a nested let is to limit the scope of y (or anything in the let block)
+Since scope and non-determinism are orthogonal (the scope of a variable won't effect if it's non-deterministic)
+this shouldn't cause any problem.
+
+----------------------------------------------------------------------------
+Tail call optimization:
+replace any tail calls with jumps
+
+f x = if x then g 1
+           else h 1
+
+is compiled to
+
+f:
+  push 1
+  cjump x g
+  jump h
+
+analysis:
+This is not safe, because either g or h (or both) could be non-deterministic
+This is also entirely dependant on the evaluation strategy.
+I'm pretty sure that we could make something like this work, but it's not free.
+
+----------------------------------------------------------------------------
+code motion: (this may not apply to a lazy language)
+move constant expressions outside of loops
+
+while x < 100:
+    i = 2 * 4
+    ...
+
+becomes
+
+i = 2*4
+while x < 100:
+    ...
+
+analysis:
+I'm not sure if this is safe.
+Suppose we have
+
+loop y 0 = y
+loop y n = let z = 1 ? y in loop z (n-1)
+
+this would translate to 
+
+loop y n = let c = n == 0
+           in case c of
+               True -> 1
+               False -> let z = 1 ? 2
+                            n' = n-1
+                            in loop z n'
+
+Since this is a tail recursive function 
+it would translate to a loop similar to
+
+while !(n == 0)
+    z = 1 ? 2
+    n' = n-1
+    loop z n'
+1
+
+by code motion this would become
+
+z = 1 ? 2
+while !(n == 0)
+    n' = n-1
+    loop z n'
+1
+
+I'm not sure if this is the same.
+When I ran this in curry I expected to get several results (loop n would give n+1 answers)
+However, I was wrong, I only got one answer.
+I think this is because we never evaluate z, so we never actually have any non-determinism.
+
+If that's correct, then I think code motion should be fine.
+
+----------------------------------------------------------------------------
+invariant hoisting:
+precompute invariants in functions
+If the function is called more than once, then the invariant won't be re-executed
+
+let g = (ackermann 100) + 2
+    in g
+
+becomes
+let a = ackarmann 100
+    g = a + 2
+    in g
+
+analysis:
+Not only is this useful, but we get it for free using A-normal form and lazy evaluation.
+Since evary expression must be trivial we can never have a subexpression that's recomputed.
+Since expressions are lazy, they'll remember their value.
+
+----------------------------------------------------------------------------
+deforestation:
+remove intermediate datastructures when we can
+
+let square [] = []
+    square (x:xs) = x*x : square xs
+
+    sum [] = 0
+    sum (x:xs) = 1 + sum xs
+
+    in sum (square [1..100])
+
+becomes
+
+let sumSquare [] = 0
+    sumSquare (x:xs) = x * x + sumSquare xs
+
+    in sumSquare [1..100]
+
+analysis:
+I'm really not sure about this.
+If any of the expressions are non-deterministic I don't think it's safe, since we have to return moltiple answers
+
+----------------------------------------------------------------------------
+induction variable reduction:
+replace code for induction variables with faster, equivalent code
+
+for(int i = 0; i < n; i++)
+{
+    sum += a[4*i];
+}
+
+becomes
+
+for(int m = 0; m < 4*n; m = m + 4)
+{
+    sum += *a + m;
+}
+
+analysis:
+This might be a bit too low level.  I think llvm will actually do this for us.
+Anyway, this wouldn't apply to non-deterministic variables, because they could't be induction variables.
+----------------------------------------------------------------------------
+optimizations for other optimizations
+----------------------------------------------------------------------------
+These optimizations are largely pointless on their own,
+but they increase the amount of code other optimizations have to work with.
+These end up being really important.
+
+----------------------------------------------------------------------------
+loop unrolling:
+duplicate the body of a loop
+I know curry doesn't have loops, but with tail call optimizations
+and data flow analysis, we can turn some functions into loops.
+
+for(int x = 1; x < 100; x++)
+{
+    sum = sum + a[x];
+}
+
+becomes
+
+for(int x = 1; x < 100; x+=2)
+{
+    sum = sum + a[x];
+    sum = sum + a[x+1];
+}
+
+analysis:
+perfectly safe.  We're just duplicating code.
+I have sources saying that this is valid and useful for functional programs, but I'm not really sure hwo often it comes up.
+Regardless, even if we duplicate a non-deterministic expression, it would have been executed twice anyway.
+
+----------------------------------------------------------------------------
+function inlining: (or beta expansion, or inline expansion)
+replace a function call with the body of a function
+
+f = x + x
+
+main = print (f 100)
+
+becomes
+
+f = x + x
+
+main = print (100 + 100)
+
+Now, constant propogation can replace 100 + 100 with 200,
+and dead code elimination can remove f
+
+analysis:
+doable, but non-trivial.
+Most inliners have several tricks they pull to get inlining to work well.
+We would probably need similar tricks to make sure we weren't duplicating non-determinism too much.
+
+----------------------------------------------------------------------------
+types of analysisanalysis
+----------------------------------------------------------------------------
+Strictness analysis:
+determine if an argument is strict
+
+liveness analysis:
+determine of a variable is ever used again
+
+dataflow analysis: (several types) 
+determine what value a variable has in a program
+
+alias analysis: (probably not relavant)
+determine what pointers are pointing too, and when 2 overlap
+
+induction variable analysis:
+determin induction variables for loops
+
+

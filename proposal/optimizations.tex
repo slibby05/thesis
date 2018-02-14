@@ -1,0 +1,24 @@
+
+\subsection{possible optimizations}
+\begin{itemize}
+  \item traditional optimizations
+  \item remove memory allocations
+  \item remove memory accesses
+\end{itemize}
+\subsection{problems with traditional optimizations}
+\begin{itemize}
+  \item textual replacement is a bad idea
+  \item $\beta$-reduction isn't safe
+  \begin{itemize}
+      \item coin example
+  \end{itemize}
+  \item most optimizations are probably pointless
+\end{itemize}
+\subsection{goals}
+\begin{itemize}
+    \item Picking optimizations that might actually help
+    \item deforrestation
+    \item shortcutting
+    \item unboxing
+    \item all optimizations apply to all non-determinism strategies
+\end{itemize}
