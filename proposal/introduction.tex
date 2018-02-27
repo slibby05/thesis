@@ -5,29 +5,29 @@ We can write simple declarative programs for many complex tasks.
 Unfortunately, many computer scientists consider current implementations of functional logic languages
 too slow to use in practice.
 This has led to the idea that functional logic languages are inherently slow.
-I think a more likely culprit is the fact that very little work on program optimization 
+I belive a more likely culprit is the fact that very little work on program optimization 
 has been incorporated into modern functional logic compilers.
 In this dissertation I intend to develop an optimization framework for the functional logic language Curry.
 This will include an intermediate language suitable for optimization;
 implementations of the defforestation, unboxing, and shortcutting optimizations;
 justification of the correctness of the implementations;
 a compiler to a low level language;
-and analysis of the running time and memory usage on several curry programs.
-I will show that it is possible to apply the optimizations of unboxing, deforestation, and shortcutting to curry programs.
-Furthermore, these optimizations will improve the performance of curry programs.
+and analysis of the running time and memory usage on several Curry programs.
+I will show that it is possible to apply the optimizations of unboxing, deforestation, and shortcutting to Curry programs.
+Furthermore, these optimizations will improve the performance of Curry programs.
 
 Functional logic programming is a very powerful technique for expressing complicated ideas in a simple form.
 Curry, a modern functional logic language, implements these ideas with a clean, easy to read syntax.
 Syntactically, Curry is very similar to Haskell, a well known functional programming language.
 Curry is also lazy, so evaluation of Curry programs is similar to evaluation of Haskell programs.
 Curry extends the syntax of Haskell with two new concepts.
-First, a non-deterministic function \texttt{?}.  
+First, there is idea of a non-deterministic function, \texttt{?}.  
 Semantically \texttt{a ? b} will evaluate \texttt{a} and \texttt{b} and will return both answers to the user.
-Second, free, or logic, variables.
+Second, there is the idea of free, or logic, variables.
 A free variable is a variable that is not in the scope of the current function.
 The value of a free variable is not defined, but it may be constrained.
 
-Consider the following Curry code
+Consider the following Curry code:
 \begin{verbatim}
 sort xs
  | ys == permute xs & sorted ys = ys
@@ -36,23 +36,24 @@ sort xs
 Here \texttt{ys} is a free variable, and it has two constraints:
 \texttt{ys} must be a permutation of \texttt{xs}, and \texttt{ys} must be sorted.
 
-Free variables are given concrete values in Curry programs via narrowing.
+Free variables are given concrete values in Curry programs through narrowing.
 The semantics of narrowing and non-determinism in Curry are given in \cite{Hanus16Curry, AntoyHanus06ICLP}.
 
 There are currently two mature Curry compilers, Pakcs and Kics2.
 Pakcs compiles Curry to Prolog in an effort to leverage Prolog's non-determinism and free variables.
-Kics2 compiles Curry to Haskell in an effort to leverage Haskell's higher order functions and GHC's optimizing compiler.
+Kics2 compiles Curry to Haskell in an effort to leverage Haskell's higher order functions and optimizing compiler.
 Both compilers have their advantages.  Pakcs tends to perform better on non-deterministic expressions with free variables,
 where Kics2 tends to perform much better on deterministic expressions.
 Unfortunately neither of these compilers perform well in both circumstances.
 
 Sprite, an experimental compiler, aims to fix these inefficiencies.
+The stragegy is to compile to a virtual assembly language, known as LLVM.
 So far Sprite has shown promising improvements over both Pakcs and Kics2 in performance,
 but it is not a mature compiler.
 
 One major disadvantage of all 3 compilers is that they all attempt to pass off optimization to another compiler.
-Pakcs attempts to have Prolog optimize the non-deterministic code, Kics2 attempts to use GHC to optimize
-deterministic code, and Sprite attempts to use LLVM to optimize the low level code.
+Pakcs attempts to have Prolog optimize the non-deterministic code; Kics2 attempts to use Haskell to optimize
+deterministic code; and Sprite attempts to use LLVM to optimize the low level code.
 Unfortunately none of these approaches work very well.
 While some implementations of Prolog can optimize non-deterministic expressions, they have no concept of higher order functions,
 so there are many optimizations they cannot apply.
@@ -60,16 +61,16 @@ Kics2 is in a similar situation.
 In order to incorporate non-deterministic computations in Haskell, 
 a significant amount of code must be threaded through each computation.
 This means that any non-deterministic expression cannot be optimized in Kics2.
-Finally since LLVM doesn't know about either higher order functions or non-determinism it loses many easy opprotunities for optimization.
+Finally, since LLVM doesn't know about either higher order functions or non-determinism, it loses many easy opprotunities for optimization.
 
 Curry programs have one last hope for efficient execution.
 Recently, many scientists \cite{peval_bjorn, offline_peval_Ramos} 
 have developed a strong theory of partial evaluation for functional logic programs.
 While these results are interesting, partial evaluation is not currently automatic in Curry.
 Guidance is required from the programmer to run the optimization.
-Furthermore the optimization fails to optimize several common programs.
+Furthermore, the optimization fails to optimize several common programs.
 
-So far all of these approaches have failed to include the large body of work on program optimizations into their implementations.
+So far all of these approaches have failed to include into their implementations the large body of work on program optimizations.
 This leads to the inescapable conclusion that Curry needs an optimizer.
 The purpose of this proposal is, first, to make a case that Pakcs, Kics2, and partial evaluation all fail to do an adequate job
 of optimizing Curry programs, then to propose a new solution of building optimization into the Curry compiler pipeline.
@@ -82,16 +83,16 @@ steele78, stg-peytonJones, anormal_Flanagan, lambda_rename_steel, lambda_goto,
 deforestation_wadler, shortcut_deforestation, haskell_inliner}
 Why don't I just use these optimizations in Curry?
 Ideally I can, but it's not immediately clear that these optimizations are valid in Curry.
-One aspect of this dissertation is to implement these optimizations in Curry,
-while another is to prove the correctness of these optimizations.
+This dissertation will contain two compnents: implementing these optimizations in Curry,
+and proving the correctness of these optimizations.
 
 I'm limiting myself to implementing defforestation, unboxing, and shortcutting in this dissertation.
 While there are many other optimizations that I could implement, I believe that these will be the most benificial.
 
 The rest of this paper is organized as follows.
-Section 2 presents the Curry language. Section 3 presents the need for an optimizing compiler in curry.
-Section 4, 5, and 6 present the history of cempiler development for functional, logic, and functional logic languages respectively.
+Section 2 presents the Curry language. Section 3 presents the need for an optimizing compiler in Curry.
+Section 4, 5, and 6 present the history of compiler development for functional, logic, and functional logic languages respectively.
 Section 7 presents the approaches to compiling Curry specifically.
 Section 8 presents the optimizations I plan to implement.
-Section 9 presents what I plan to deliver at the end of the dissertation.
+Section 9 presents my final deliverable at the end of the dissertation.
 Finally section 10 concludes.
