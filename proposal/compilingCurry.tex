@@ -1,15 +1,173 @@
 
 \subsection{Curry evaluation model}
+
+Right now there are three current compilers for Curry:
+Pakcs, which compiles Curry into Prolog;
+Kikcs2, which compiles Curry into Haskell;
+and Sprite, which compiles Curry into LLVM code.
+While these compilers all compile to different languages,
+the more important difference is how they handle non-determinism.
+In this section I'll take an in-depth look at these compilers,
+and use these ideas to propose an adequate compilation strategy
+to demonstrate optimizations.
+
+\subsection{Pakcs}
+
+The Pakcs compiler is built on the foundations of Prolog.
+Not only does Pakcs compile Curry to Prolog,
+but it does so in such a way that all of the non-standard features 
+of Curry are handled by Prolog.
+For example, free variables in Curry are translated to free variables in Prolog,
+and the choice operator in Curry is translated into parallel clauses in Prolog.
+The immediate consequence of this is that all non-determinism is done through backtracking.
+While this strategy is efficient, it is not complete.
+That is, there are Curry programs that could produce an answer, but will fail to do so in Pakcs.
+For a full specification of the translation see figure \ref{curryToProlog}.
+
+There are several advantages to translating Curry into Prolog.
+One advantage is that the translation is very simple.
+A compiler from FlatCurry to Prolog can be written over the course of a week.
+Another advantage is the entirely reasonable assumption that the Prolog compiler
+will do a better job of implementing non-determinism and free variables then a curry compiler would.
+The basis for this assumption is that more research and work has gone into the Prolog compiler.
+Furthermore, any improvements of the efficiency of Prolog directly correlate to improvements
+in the efficiency of Curry.
+
+
+While these benifits are nice, we have already discussed the drawbacks of compiling to Prolog.
+Since prolog doesn't have an idea of a function, we must add that abstraction on to the compiled code.
+Furthermore, Prolog has no notion of lazy evaluation, so this must be emulated as well.
+Both of these have a very strong impact on performance.
+To see why consider the generated code for the sum function.
+
+\begin{verbatim}
+sum [] = 0
+sum (x:xs) = x + xs
+\end{verbatim}
+
+This is a simple functional program, and even translating this to a logic program is not terribly complicated.
+However, the Pakcs compiler produces something similar to the following code.
+
+\begin{verbatim}
+sum(Arg,Result,Start,End) :- hnf(Arg, HArg, Start, Mid),
+                             sum_1(HArg, Result, Mid, End).
+
+sum_1([],      0,       End,   End).
+sum_1([X|XS],  Result,  Start, End) :- !, hnf(+(X, sum(XS)),Result,Start,End).
+sum_1(fail(F), fail(F), End,   End) :- nonvar(F).
+\end{verbatim}
+
+Those familiar with prolog may find this a little odd.
+Why are we calling a mysterious \texttt{hnf} function to compute the value of \texttt{X + sum(XS)}?
+In fact Why do we have two seperate \texttt{sum} predicates at all?
+Those familiar with functional interpreters may have already guessed where this is headed.
+Pakcs doesn't compile Curry programs, it generates rules that interpret Curry expressions.
+There are two rules generated \texttt{nf} and \texttt{hnf}, which are responsible for reducing expressions
+to normal form, and head normal form respectively.
+
+The \texttt{nf} rule is actually static across all programs.  It computes the head normal form of the argument,
+and computes the normal form of all of the argument's children.
+The \texttt{hnf} rule must be generated for every new program.
+It is essentially a giant case discriminator for every possible function symbol.
+As an example:
+
+\begin{verbatim}
+hnf(sum(XS), Result, Start, End) :- sum(XS,Result,Start,End).
+hnf(foldl(OP,Z,XS), Result, Start End) :- foldl(OP,Z,XS, Result, Start, End).
+hnf(++(XS,YS), Result, Start End) :- ++(XS, YS, Result, Start, End).
+hnf(+(X,Y), Result, Start End) :- +(X, Y, Result, Start, End).
+\end{verbatim}
+
+Here each function is compiled in a manner similar to \texttt{sum}.
+There are a few inherent inefficiencies in this style of compilation.
+This first is that we construct several nodes that we don't need.
+For example if we evaluate the expression \texttt{sum [2]} we will produce the intermediate result.
+\texttt{hnf(+(2, sum([])), R, S, E)}.
+There is no reason to construct the \texttt + node.
+The second is that every expression that does not directly produce a value makes a call to the \texttt{hnf}
+predicate.
+This call to \texttt{hnf} is inherently slow, due to the fact that it contains a giant case discriminator.
+The \texttt{hnf} predicate must contain a case for every function defined in the program, and any library that it imports.
+This may result in hundreds or thousands of different cases.  Furthermore we call the \texttt{hnf} predicate many times.
+
+\subsection{Kics2}
+
+The Kics2 compiler takes a different approach, and compiles Curry to Haskell.
+The hope is that deterministic functions can be compiled to Haskell code,
+and therefore take advantage of GHC's many optimizations.
+Unfortunately this doesn't quite work out.
+Suppose we have the code:
+
+\begin{verbatim}
+sum [0 ? 1, 2, 3]
+\end{verbatim}
+
+While the sum function can have a deterministic implementation, 
+it must be able to handle non-deterministic values.
+The strategy for dealing with non-determinism in Kics2 is pull-tabbing.
+The idea itself is simple.  If I have a choice, then I just clone the expression that produced that choice.
+We can make this more concrete with the following example.
+Suppose I have:
+\begin{verbatim}
+sum ([1] ? [2])
+\end{verbatim}
+Then I can replace this expression with the equivalent
+\begin{verbatim}
+sum [1] ? sum [2]
+\end{verbatim}
+This will evaluate to \texttt 1 and \texttt 2.
+We can even implement this by extending each type in Curry with a \texttt{Choice} and \texttt{Fail} constructor.
+Initially this seems straightforward, but there's an issue hiding in this implementation.
+This does not implement call time choice semantics.
+In order to implement call time choice semantics, we must keep track of each choice.
+Kics2 does this with an \texttt{Integer}, but any type of unique identifier can work.
+This integer is referred to an \texttt{IDSupply}
+
+The addition of an \texttt{IDSupply} has two major drawbacks in Kics2.
+The first is that every function must take an extra parameter.
+The second, and more serious issue, is that parameter directly effects the control flow of a function.
+This makes it difficult for GHC to apply optimizations.
+This is so severe that if Kics2 cannot determine that a  function will only be used in a deterministic contect,
+then no optimizations will be applied.
+As an extreme example, \texttt{sum [1,2,3,4]} cannot be optimizaed at all.
+
+
+%Suppose we have the function:
+%\begin{verbatim}
+%xorSelf b = xor b b
+%\end{verbatim}
+%It's clear that this should never return \texttt{True}, 
+%however if we implement a neively implement pull-tabbing, it is very easy to get the to return \texttt{True}
+%\begin{verbatim}
+%xorSelf (True ? False) =
+%xor (True ? False) (True ? False) =
+%(True ? False) ? (False ? True)
+%\end{verbatim}
+%Here, half of the result we recieve, should be impossible.
+%This neieve implementation is knows as run time choice semantics.
+%The alternative, Call-time choice semantics, requires us to decide on a value before the call.
+%There are two ways to implement call time choice semantics.  The first is wich eager evaluation, however this is incompatable with Curry.
+
+
+
 \begin{itemize}
-  \item Pakcs: non-determinism through backtracking
-  \item Kics2: non-determinism through pull-tabbing
   \item Sprite: complete pull-tabbing
 \end{itemize}
-\subsection{current curry compilation}
-\begin{itemize}
-  \item compilers vs interpreters
-\end{itemize}
 \subsection{graph rewriting vs graph reduction}
+This is an example between the two different ideas of compiling functional programs.
+Pakcs compiles all of the Curry functions into rewrite rules.
+Expressions are rewritten until they reach a normal form.
+The alternative to graph rewriting is graph reduction.
+The idea is that the graph knows how to reduce itself to a normal form.
+This is the approach commonly taken by functional language compilers such as Haskell or ML.
+Each node in the graph contains a pointer to code that will compute a value in head normal form for that node.
+These nodes with code pointers are commonly known as closures.
+
+While there is nothing showing that graph rewriting is inherently slower than graph reduction,
+the common belief among the function community is that they are.
+There is a possibility that graph rewriting may be competitive with graph reduction
+with aggressive optimizations, but that is not the focus of this research.
+
 \begin{itemize}
   \item Pakcs and graph rewriting
   \item GHC and graph reduction
