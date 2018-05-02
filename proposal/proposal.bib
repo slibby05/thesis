@@ -137,6 +137,19 @@
   publisher = {Springer LNCS 4098},
 }
 
+
+@InProceedings{fair_scheme,
+  author="Antoy, Sergio and Jost, Andy",
+  editor="Gupta, Gopal and Pe{\~{n}}a, Ricardo",
+  title="Compiling a Functional Logic Language: The Fair Scheme",
+  booktitle="Logic-Based Program Synthesis and Transformation",
+  year="2014",
+  publisher="Springer International Publishing",
+  address="Cham",
+  pages="202--219",
+  isbn="978-3-319-14125-1"
+}
+
 @InProceedings{Antoy92ALP,
   author    = {S. Antoy},
   title     = {Definitional Trees},
@@ -161,6 +174,23 @@
   ee      = {http://dx.doi.org/10.1017/S1471068411000263},
 }
 
+@InProceedings{curry_vm,
+  author="Antoy, Sergio
+  and Hanus, Michael
+  and Liu, Jimeng
+  and Tolmach, Andrew",
+  editor="Grelck, Clemens
+  and Huch, Frank
+  and Michaelson, Greg J.
+  and Trinder, Phil",
+  title="A Virtual Machine for Functional Logic Computations",
+  booktitle="Implementation and Application of Functional Languages",
+  year="2005",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="108--125",
+}
+
 @InProceedings{Antoy01PPDP,
   author    = {S. Antoy},
   title     = {Constructor-based Conditional Narrowing},
@@ -173,7 +203,7 @@
   location  = {Florence, Italy},
 }
 
-@InProceedings{Antoy97ALP,
+@InProceedings{Atoy97ALP,
   author    = {S. Antoy},
   title     = {Optimal Non-Deterministic Functional Logic Computations},
   booktitle = {Proceedings of the Sixth International Conference on Algebraic and Logic Programming (ALP'97)},
@@ -184,6 +214,23 @@
   publisher = {Springer LNCS 1298},
   note      = {Extended version at http://cs.pdx.edu/~antoy/homepage/publications/alp97/full.pdf},
 }
+
+
+@article{needed,
+ author = {Antoy, Sergio and Echahed, Rachid and Hanus, Michael},
+ title = {A Needed Narrowing Strategy},
+ journal = {J. ACM},
+ issue_date = {July 2000},
+ volume = {47},
+ number = {4},
+ month = jul,
+ year = {2000},
+ pages = {776--822},
+ numpages = {47},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -461,19 +508,19 @@ isbn = {0-8186-5060-5}
 
 % Lambda the ultimate papers
 
-@article{ultimate_imparative,
+@article{ultimate_imperative,
     author = { Guy Lewis Steele, Jr. and Gerald Jay Sussman},
     title = {Lambda: The Ultimate Imperative},
     publisher = {MIT AI Lab},
     year = 1976,
-    month = march,
+    month = Mar,
 }
-@article{ultimate_declaritive,
+@article{ultimate_declarative,
     author = {Guy Lewis Steele, Jr.},
     title = {Lambda: The Ultimate Declarative},
     publisher = {MIT AI Lab},
     year = 1976,
-    month = November,
+    month = Nov,
 }
 @article{lambda_rename_steel,
     author = {Guy Lewis Steele, Jr.},
@@ -537,7 +584,6 @@ author = "Philip Wadler"
  address = {New York, NY, USA},
 } 
 
-% TODO: add deforestation (Wadler) and secrets of the ghc inliner (I think?) (SPJ)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -546,7 +592,7 @@ author = "Philip Wadler"
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-@thesis{peval_bjorn,
+@phdthesis{peval_bjorn,
     title = {Normalization and Partial Evaluation of Functional Logic Programs},
     author = {Björn Peemöller},
     year = 2016,
@@ -570,6 +616,373 @@ author = "Philip Wadler"
  keywords = {narrowing, offline partial evaluation},
 } 
 
+@article{wrongData,
+ author = {Mytkowicz, Todd and Diwan, Amer and Hauswirth, Matthias and Sweeney, Peter F.},
+ title = {Producing Wrong Data Without Doing Anything Obviously Wrong!},
+ journal = {SIGPLAN Not.},
+ issue_date = {March 2009},
+ volume = {44},
+ number = {3},
+ month = mar,
+ year = {2009},
+ pages = {265--276},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+@article{STABILIZER,
+ author = {Curtsinger, Charlie and Berger, Emery D.},
+ title = {STABILIZER: Statistically Sound Performance Evaluation},
+ journal = {SIGARCH Comput. Archit. News},
+ issue_date = {March 2013},
+ volume = {41},
+ number = {1},
+ month = mar,
+ year = {2013},
+ pages = {219--228},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+@InProceedings{vmSwitch,
+author="Ertl, M. Anton and Gregg, David",
+editor="Sakellariou, Rizos and Gurd, John and Freeman, Len and Keane, John",
+title="The Behavior of Efficient Virtual Machine Interpreters on Modern Architectures",
+booktitle="Euro-Par 2001 Parallel Processing",
+year="2001",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="403--413",
+}
+
+@article{secd,
+    author="Landin, Peter",
+    title="The Mechanical Evaluation of Expressions",
+    year=1964,
+    journal="The Computing Journal",
+    pages="308-320",
+}
 
 
-@Comment{jabref-meta: databaseType:bibtex;}
+
+@inproceedings{kl1,
+ author = {Chikayama, Takashi and Fujise, Tetsuro and Sekita, Daigo},
+ title = {A Portable and Efficient Implementation of KL1},
+ booktitle = {Proceedings of the 6th International Symposium on Programming Language Implementation and Logic Programming},
+ series = {PLILP '94},
+ year = {1994},
+ pages = {25--39},
+ publisher = {Springer-Verlag},
+ address = {London, UK, UK},
+} 
+
+@PHDTHESIS{oz,
+  title = {Design, Implementierung und Evaluierung einer virtuellen Maschine 		  f{\"u}r {Oz}},
+  year = {1998},
+  author = {Ralf Scheidhauer},
+  school = {Universit{\"a}t des Saarlandes, Fachbereich Informatik},
+  address = {Saarbr{\"u}cken, Germany},
+  month = dec,
+  sline = {3194},
+  project-key = {C1},
+  label = {scheidhauer-thesis}
+}
+
+@InProceedings{graph_ir,
+  author="Barendregt, H. P.
+  and van Eekelen, M. C. J. D.
+  and Glauert, J. R. W.
+  and Kennaway, J. R.
+  and Plasmeijer, M. J.
+  and Sleep, M. R.",
+  editor="de Bakker, J. W.
+  and Nijman, A. J.
+  and Treleaven, P. C.",
+  title="Towards an intermediate language based on Graph Rewriting",
+  booktitle="PARLE Parallel Architectures and Languages Europe",
+  year="1987",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="159--175",
+}
+
+@InProceedings{dactl,
+  author="Glauert, J. R. W.
+  and Kennaway, J. R.
+  and Sleep, M. R.",
+  editor="Ehrig, Hartmut
+  and Kreowski, Hans-J{\"o}rg
+  and Rozenberg, Grzegorz",
+  title="Dactl: An experimental graph rewriting language",
+  booktitle="Graph Grammars and Their Application to Computer Science",
+  year="1991",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="378--395",
+}
+
+@InProceedings{hal,
+  author="Demoen, Bart
+  and de la Banda, Maria Garc{\'i}a
+  and Harvey, Warwick
+  and Marriott, Kim
+  and Stuckey, Peter",
+  editor="Jaffar, Joxan",
+  title="An Overview of HAL",
+  booktitle="Principles and Practice of Constraint Programming -- CP'99",
+  year="1999",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="174--188",
+}
+
+@Inbook{caio,
+  author="Hermenegildo, Manuel V.
+  and Bueno, Francisco
+  and Carro, Manuel
+  and L{\'o}pez, Pedro
+  and Morales, Jos{\'e} F.
+  and Puebla, German",
+  title="An Overview of the Ciao Multiparadigm Language and Program Development Environment and Its Design Philosophy",
+  bookTitle="Concurrency, Graphs and Models: Essays Dedicated to Ugo Montanari on the Occasion of His 65th Birthday",
+  year="2008",
+  publisher="Springer Berlin Heidelberg",
+  address="Berlin, Heidelberg",
+  pages="209--237",
+}
+
+
+@article{toy,
+  author = {I. Castiñeiras and J. Correas and S. Estévez-Martín and F. Sáenz-Pérez},
+  title     = {TOY: A CFLP Language and System},
+  journal   = {{The Association for Logic Programming}},
+  year      = 2012,
+  url       = {https://www.cs.nmsu.edu/ALP/2012/06/toy-a-cflp-language-and-system/},
+}
+
+@Article{babbel,
+  author="Kuchen, Herbert
+  and Loogen, Rita
+  and Moreno-Navarro, Juan Jos{\'e}
+  and Rodr{\'i}guez-Artalejo, Mario",
+  title="The functional logic language BABEL and its implementation on a graph machine",
+  journal="New Generation Computing",
+  year="1996",
+  month="Dec",
+  day="01",
+  volume="14",
+  number="4",
+  pages="391--427",
+}
+
+
+@Article{mercury,
+  author="Somogyi, Zoltan and Henderson, Fergus",
+  title="The design and implementation of Mercury",
+  journal="Joint International Conference and Symposium on Logic Programming",
+  year="1996",
+  month="Sep",
+  day="02",
+}
+
+@incollection{history_LP,
+ author = {Kowalski, Robert and Clark, Keith L.},
+ title = {Logic Programming},
+ booktitle = {Encyclopedia of Computer Science},
+ pages = {1017--1031},
+ numpages = {15},
+ publisher = {John Wiley and Sons Ltd.},
+ address = {Chichester, UK},
+} 
+
+@TECHREPORT{wam,
+ author = {Warren, David},
+ title = {An Abstact Prolog Instruction Set},
+ institution = {SRI International},
+ year = {1983},
+ month = {Aug},
+ pages = {29},
+} 
+@book{wam2,
+  author = {Aït-Kaci, Hassan},
+  year = {1991},
+  month = {01},
+  pages = {939},
+  title = {Warren's Abstract Machine: A Tutorial Reconstruction}
+}
+
+@inproceedings{sicstus,
+ author = {Haygood, Ralph Clarke},
+ title = {Native Code Compilation in SICStus Prolog},
+ booktitle = {Proceedings of the Eleventh International Conference on Logic Programming},
+ year = {1994},
+ pages = {190--204},
+ numpages = {15},
+ publisher = {MIT Press},
+ address = {Cambridge, MA, USA},
+} 
+
+@inproceedings{planner,
+ author = {Hewitt, Carl},
+ title = {PLANNER: A Language for Proving Theorems in Robots},
+ booktitle = {Proceedings of the 1st International Joint Conference on Artificial Intelligence},
+ series = {IJCAI'69},
+ year = {1969},
+ location = {Washington, DC},
+ pages = {295--301},
+ numpages = {7},
+ publisher = {Morgan Kaufmann Publishers Inc.},
+ address = {San Francisco, CA, USA},
+} 
+
+@inproceedings{alf,
+ author = {M. Hanus and A. Schwab},
+ title = {ALF User’s Manual},
+ year = {1995},
+ location = {F. B. Informatik, University},
+} 
+@article{kleaf,
+title = "Kernel-LEAF: A logic plus functional language",
+journal = "Journal of Computer and System Sciences",
+volume = "42",
+number = "2",
+pages = "139 - 185",
+year = "1991",
+author = "Elio Giovannetti and Giorgio Levi and Corrado Moiso and Catuscia Palamidessi"
+}
+
+@inproceedings{unboxing,
+  author = {Jones, SL Peyton and Launchbury, J and Peyton Jones, Simon},
+  title = {Unboxed values as first class citizens},
+  booktitle = {ACM Conference on Functional Programming and Computer Architecture (FPCA'91)},
+  year = {1991},
+  month = {January},
+  publisher = {Springer},
+  pages = {636-666},
+  volume = {523},
+}
+
+@InProceedings{unboxing_peval,
+author="Hall, Cordelia
+and Jones, Simon L. Peyton
+and Sansom, Patrick M.",
+editor="Hammond, Kevin
+and Turner, David N.
+and Sansom, Patrick M.",
+title="Unboxing using Specialisation",
+booktitle="Functional Programming, Glasgow 1994",
+year="1995",
+publisher="Springer London",
+address="London",
+pages="96--110",
+}
+
+@article{lisp,
+ author = {McCarthy, John},
+ title = {Recursive Functions of Symbolic Expressions and Their Computation by Machine, Part I},
+ journal = {Commun. ACM},
+ issue_date = {April 1960},
+ volume = {3},
+ number = {4},
+ month = apr,
+ year = {1960},
+ pages = {184--195},
+ numpages = {12},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+
+@article{cek,
+ author = {Matthias Felleisen and Daniel P. Friedman},
+ title = {Control Operators, the SECD-Machine, and the Lambda-Calculus},
+ booktitle = {Proc. of the IFIP TC},
+ month = {June},
+ year = {1986},
+ pages = {193--219},
+} 
+
+@InProceedings{tim,
+ author="Fairbairn, Jon and Wray, Stuart",
+ editor="Kahn, Gilles",
+ title="Tim: A simple, lazy abstract machine to execute supercombinators",
+ booktitle="Functional Programming Languages and Computer Architecture",
+ year="1987",
+ publisher="Springer Berlin Heidelberg",
+ address="Berlin, Heidelberg",
+ pages="34--45",
+}
+
+@phdthesis{gmachine,
+   author = {Augustsson L.},
+   title = {Compiling Lazy Functional Languages},
+   institution = {Chalmers Tekniska Hogskola},
+   year = 1978,
+}
+
+@misc{ghc,
+    title = "The Glasgow Haskell Compiler",
+    howpublished = "https://www.haskell.org/ghc/",
+}
+
+@article{Robinson:1965,
+  author = {Robinson, J. A.},
+  title = {A Machine-Oriented Logic Based on the Resolution Principle},
+  journal = {J. ACM},
+  volume = {12},
+  number = {1},
+  month = jan,
+  year = {1965},
+  pages = {23--41},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+}
+
+@TECHREPORT{dec,
+ author = {D.L. Bowen and L. Byrd and F.C.N. Pereira and L.M. Pereira and Warren, David},
+ title = {DECsystem-10 PROLOG USER'S MANUAL},
+ institution = {Department of Artificial Intelligence University of EdinburghSRI International},
+ year = {1982},
+ month = {Nov},
+ pages = {97},
+} 
+
+@article{yap,
+ author = {Costa, V\'{\i}tor Santos and Rocha, Ricardo and Damas, Lu\'{\i}s},
+ title = {The Yap Prolog System},
+ journal = {Theory Pract. Log. Program.},
+ issue_date = {January 2012},
+ volume = {12},
+ number = {1-2},
+ month = Jan,
+ year = {2012},
+ pages = {5--34},
+ numpages = {30},
+ publisher = {Cambridge University Press},
+ address = {New York, NY, USA},
+} 
+@inproceedings{prolog,
+ author = {Colmerauer, Alain and Roussel, Philippe},
+ title = {The Birth of Prolog},
+ booktitle = {The Second ACM SIGPLAN Conference on History of Programming Languages},
+ series = {HOPL-II},
+ year = {1993},
+ isbn = {0-89791-570-4},
+ location = {Cambridge, Massachusetts, USA},
+ pages = {37--52},
+ numpages = {16},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+} 
+
+@inproceedings{shortcutting,
+  title = "Needed Computations Shortcutting Needed Steps",
+  author = "Sergio Antoy and Jacob Johannsen and Steven Libby",
+  year = "2015",
+  doi = "10.4204/EPTCS.183.2",
+  language = "English",
+  volume = "183",
+  pages = "18--32",
+  booktitle = "Electronic Proceedings in Theoretical Computer Science, EPTCS",
+  publisher = "Open Publishing Association",
+}

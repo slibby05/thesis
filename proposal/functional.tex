@@ -1,14 +1,39 @@
 
-\subsection{history}
-\begin{itemize}
-    \item CEK
-    \item SECD
-    \item TIM
-    \item g-machine
-    \item STG
-\end{itemize}
-\subsection{modern functional compilers}
-\begin{itemize}
-    \item representation of programs
-    \item graph reduction
-\end{itemize}
+There is a long history of functional programming with many different languages.
+However, my concern here is strictly the development of functional compiler technology,
+so I will instead focus on the compilers and abstract machines used to run functional languages.
+
+The first real implementation of a functional language was LISP \cite{lisp}.
+This was implemented with an interpreter, but it introduced several important concepts such as
+closures for static scoping, and garbage collection.
+Further implementations would compile a functional language to an abstract machine.
+This filled the role of an intermediate representation for functional languages.
+
+Landin's ISWIM language introduced an abstract machine called the SECD machine \cite{secd}.
+This machine was an attempt to define the basic operations of a functional language.
+Further improvements were made by Felleisen and Friedman, who produced the CEK machine which is still used in the Racket
+programming language \cite{cek}.
+
+An entirely separate approach to compiling functional languages was to use supercombinators.
+The most influential version was the TIM (Three Instruction Machine) \cite{tim}.
+Although this was easier to implement, it is commonly believed to be inefficient compared to other machines.
+
+The final approach to compiling functional languages is the graph reduction machine, known as the g-machine \cite{gmachine}.
+This was used in the Miranda language, and was later adapted to the tagless G-machine, and the spineless tagless G-machine,
+which is used in the Glasgow Haskell Compiler. \cite{functional_PeytonJones, ghc}.
+
+Along with abstract machines, there were several advancements for optimizing programming languages.
+Several optimizations, such as constant folding, could be translated immediately to functional languages.
+Several more optimizations came from early scheme compilers: Steel's Rabbit compiler, and Kranz' Orbit compiler \cite{steele78,orbit}.
+Steel showed how several common constructs in programming languages could be translated into lambda calculus 
+\cite{ultimate_imperative, ultimate_declarative},
+which allowed for lambda calculus to function as an intermediate language that could be optimized.
+Later Steel showed how lambda calculus could be implemented efficiently \cite{ lambda_rename_steel, lambda_goto}.
+
+One of the optimizations in Rabbit and Orbit was the use of Continuation Passing Style as an intermediate representation.
+This allowed several dataflow optimizations to be performed more easily, and is similar to SSA 
+for imperative languages \cite{continuations_appel}.
+Later, Flanagan and Felleisen, among others, refined CPS by removing ``administrative redexes'' to Administrative Normal Form
+\cite{anormal_Flanagan}.
+This representation is commonly used in modern functional compilers, and is the basis for the STG-machine \cite{stg-peytonJones}.
+

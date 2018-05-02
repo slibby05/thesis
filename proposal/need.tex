@@ -23,7 +23,7 @@ sum (x:xs) = x + sum xs
 Let's translate this to Prolog.
 In Prolog, a clause doesn't return a value.
 It just finds values for variables such that the clause is true.
-So, our clause is a relation between a list and it's sum
+So, our clause is a relation between a list and it's sum.
 \begin{verbatim}
 sum(List, N)
 \end{verbatim}
@@ -41,31 +41,34 @@ Conside the \texttt{map} function:
 map f [] = []
 map f (x:xs) = f x : map f xs
 \end{verbatim}
-This would be translated as:
+Assuming we have an \texttt{apply} predicate that will apply a function to it's argument,
+this would be translated as:
 \begin{verbatim}
 map(F, [],     []).
 map(F, [X|XS], [FX|FXS]) :- apply(F,X,FX), map(F,XS,FXS).
 \end{verbatim}
 
 Since we must apply \texttt F to \texttt X for this predicate, we will perform eager evaluation.
+All of the values of the list will be fully evaluated.
 To get around this problem, we must create a new type of node that is an unevaluated function application.
-\texttt{app(F,X)}.
+\texttt{apply\_F(F,X)}.
 This is similar to a thunk in Haskell.
+I"ll use \texttt{func\_F} to represent an unevaluated application of \texttt{func}.
 Now map will actually be translated to:
 \begin{verbatim}
 map(F, [],     []).
-map(F, [X|XS], [app(F,X)|app(app(map,F), XS)]).
+map(F, [X|XS], [apply_F(F,X) | apply_F(apply_F(map,F), XS)]).
 \end{verbatim}
 
-Here we deconstructed the list, and created four new nodes, a new list, and three application nodes.
-This seems inefficitent, but this process of rewiring graphs is very common in lazy languages.
+Here we reconstructed the list, and created four new nodes, a new list, and three application nodes.
+This seems inefficient, but this process of rewiring graphs is very common in lazy languages.
 However, this has a negative effect on our \texttt{sum} example.
 This example must be translated to:
 \begin{verbatim}
 sum([],     0).
-sum([X|XS], app(app(+, 1), app(sum, XS)).
+sum([X|XS], apply_F(apply_F(+_F, 1), apply_F(sum_F, XS)).
 \end{verbatim}
-Here we created three new nodes where the origional translation didn't need any new nodes.
+Here we created three new nodes where the original translation didn't need any new nodes.
 
 This issue of creating new nodes is a problem, however this is not new.
 Haskell compilers have dealt with this issue for years, and they have several solutions.
@@ -75,7 +78,7 @@ This is the idea behind the Kics2 compiler.
 This is a good idea in theory, but it has one major drawback.
 In order to compile Curry to Haskell we need to handle non-determinism in Haskell.
 This is not as straight forward as we might hope.
-The current approach is known as pull tabbing \cite{pullTab}.
+The current approach is known as pull tabbing \cite{Antoy11ICLP}.
 This strategy will be defined later, but it requires that every variable contains a unique identifier,
 and that we keep record of all of the non-deterministic choices that have been made.
 
@@ -94,11 +97,11 @@ As an example consider the simple non-deterministic expression:
 \begin{verbatim}
 e = (1 + 2 + 3 + 4 + 5) `div` (1 ? 0)
 \end{verbatim}
-It's clear that this expression only has one value.  The expresion \texttt{1 + 2 + 3 + 4 + 5 `div` 0} will fail.
+It's clear that this expression only has one value.  The expression \texttt{1 + 2 + 3 + 4 + 5 `div` 0} will fail.
 So, we should be able to optimize this to \texttt{15}.
 Unfortunately Kics2 is not able to optimize this, because GHC doesn't know what the \texttt ? function is.
 Furthermore, it doesn't know how to optimize failure.
-This is expectd, but we might expect GHC to be able to optimize the subexpression \texttt{1 + 2 + 3 + 4 + 5}.
+This is expected, but we might expect GHC to be able to optimize the subexpression \texttt{1 + 2 + 3 + 4 + 5}.
 This is a simple case of constant folding.
 
 In order to determine Kics2's ability to optimize Curry, it is necessary to look at the generated code.
@@ -143,7 +146,7 @@ Because of this assumption, GHC cannot optimize any expressions with arithmetic,
 There are similar problems with function inlining, and partial evaluation.
 However, I believe that this is the simplest example that demonstrates the problem.
 These compilation strategies will have a difficult time optimizing many common Curry programs.
-I belive that the best solution here is to build up the theory of optimization for functional logic programs.
-Much of this theory will be similar to optimizing imperitive, functional, and logic programs,
+I believe that the best solution here is to build up the theory of optimization for functional logic programs.
+Much of this theory will be similar to optimizing imperative, functional, and logic programs,
 so it is worth taking a detour to explore the history of compiler optimizations.
 

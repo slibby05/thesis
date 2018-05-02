@@ -1,24 +1,82 @@
+Now that I have a general compilation strategy, I need to apply optimizations.
+As previously mentioned, there are many optimizations to choose from.
 
-\subsection{possible optimizations}
-\begin{itemize}
-  \item traditional optimizations
-  \item remove memory allocations
-  \item remove memory accesses
-\end{itemize}
-\subsection{problems with traditional optimizations}
-\begin{itemize}
-  \item textual replacement is a bad idea
-  \item $\beta$-reduction isn't safe
-  \begin{itemize}
-      \item coin example
-  \end{itemize}
-  \item most optimizations are probably pointless
-\end{itemize}
-\subsection{goals}
-\begin{itemize}
-    \item Picking optimizations that might actually help
-    \item deforrestation
-    \item shortcutting
-    \item unboxing
-    \item all optimizations apply to all non-determinism strategies
-\end{itemize}
+The theory of compiler optimizations is nearly half a century old.
+Most commonly applied optimizations today originated back in 1969 \cite{optminzation_allen}.
+In 1972 Allen et al. cataloged several optimizations, and showed how to use data flow analysis for optimization \cite{dataflow_allen}.
+At this point all optimizations were local to a given block of code.
+In 1973 Kindall showed how to do global program optimization using dataflow analysis \cite{dataflow_kildall}.
+Alpern et al. developed the SSA intermediate representation where variables are never reassigned \cite{ssa_alpern}.
+Wegman et al. showed several optimizations that took advantage of SSA \cite{ssa_Wegman}.
+Stolts et al. used induction analysis to further optimize program \cite{ssa_wolfe}
+
+\subsection{Problems With Traditional Optimizations}
+While these optimizations are all useful, they may not be applicable to Curry.
+As an example, one very prevalent optimization from functional programming is function inlining.
+This is where we take function call and, after appropriately renaming variables,
+replace the call with the function body.
+The reduces the number of function calls we need to make, and gives us more code to make other optimizations.
+This seems like a good candidate.
+Unfortunately, this doesn't work well with non-determinism.
+Suppose we have the code:
+\begin{verbatim}
+xor True True   = True
+xor True False  = False
+xor False True  = False
+xor False False = True
+
+xorSelf x = xor x x
+
+xorSelf (True ? False)
+\end{verbatim}
+It should be the case that \texttt{xorSelf} will always return \texttt{False},
+but if we inline the line \texttt{xorSelf (True ? False)} we will be left with \texttt{xor (True ? False) (True ? False)}.
+This expression can now evaluate to \texttt{True}.
+This violates the call-time choice semantics of Curry \cite{LopezFraguas14TPLP}.
+Therefore, I cannot use simple textual replacement to implement inlining or $\beta$-reduction as in Haskell or ML.
+This is another point in favor of using a graph-based IR.
+
+We run into further problems with traditional optimizations.
+The biggest problem is that they may not be effective.
+Constant folding is a useful optimization for programs with a large amount of arithmetic,
+but it may not be as effective in Curry.
+I should be careful to avoid implementing optimizations that will not be effective.
+
+To this end I am interested in optimizations that are going to be effective for Curry.
+One major problem with Curry performance is memory usage.
+As we have seen already, many Curry problems require much more space than they should.
+This, in turn, prompts Curry programs to spend a lot of their running time creating and destroying
+small pieces of memory.
+One way to improve Curry performance is to reduce the number of nodes that are created and destroyed.
+To that end, I've picked three optimizations to implement: unboxing, deforestation, and shortcutting.
+
+Boxing refers to abstracting primitive data types in order to make a uniform representation of data.
+This is a very common process in programming languages.  It makes development of the compiler easier,
+and it reduces hard-to-find errors.
+This is more important in lazy languages where a variable or parameter may be represented by unevaluated code
+instead of a concrete value.
+However, boxing has a major performance penalty.
+All arithmetic with boxed values must first dereference the values.
+In order to alleviate this performance penalty we would like to unbox values.
+Unboxing is the process of replacing boxed literals with literal values.
+Launchbury et al. showed that unboxing can be implemented in a lazy functional language \cite{unboxing}.
+Hall et al. showed that unboxing can be implemented using partial evaluation \cite{unboxing_peval}.
+It remains to be shown that unboxing can be implemented with non-deterministic values.
+This seems reasonable, since non-deterministic values can behave like unevaluated expressions.
+
+Deforestation is an optimization technique that originated with functional programming \cite{deforestation_wadler}.
+The idea is that there are many functional programs that produce intermediate data structures, and immediately consume them.
+Deforestation will rewrite these functions so that they do not create these data structures.
+Wadler showed the initial deforestation transformation \cite{deforestation_wadler}, and 
+Launchbury et al. showed how this transformation could simplified \cite{shortcut_deforestation}.
+While the implementation of deforestation should be straightforward,
+it remains to be shown the deforestation is still valid for non-deterministic expressions.
+
+Shortcutting is a relatively recent idea for optimizing functional logic programs \cite{shortcutting}.
+It is similar to the idea of deforestation, in that we are avoiding the construction of intermediate data structures.
+However, the goal of shortcutting is to avoid the construction of intermediate function nodes.
+Shortcutting has been shown to be effective in theory, but has yet to be implemented in a full compiler.
+
+All three of these optimizations are focused on saving memory.
+While there are many other possible optimizations, I believe that these will be effective in a real Curry compiler.
+

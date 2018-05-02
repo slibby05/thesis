@@ -5,30 +5,56 @@ Logic programming uses relations as an abstraction to encourage relational think
 Curry is an attempt to unify both of these approaches as a functional logic language.
 
 Curry is by no means the first language to integrate the ideas of functional and logic programming.
-On the logic side, Mercury \cite{} and HAL \cite{} included a type system and higher order functions;
-Caio \cite{}, a dialect of Prolog, added notation for functions;
-OZ \cite{} also included support for both funcitonal and logic programming;
-and the Toy programming language \cite{} adds support for lazy functional logic programming in a prolog-like syntax.
-Curry \cite{} is a modern functional logic language with Haskell-like syntax.
+On the logic side, Mercury \cite{mercury} and HAL \cite{hal} included a type system and higher order functions;
+Caio \cite{caio}, a dialect of Prolog, added notation for functions;
+OZ \cite{oz} also included support for both functional and logic programming;
+and the Toy programming language \cite{toy} adds support for lazy functional logic programming in a Prolog-like syntax.
+Curry \cite{Hanus16Curry} is a modern functional logic language with Haskell-like syntax.
 
-While Curry is syntactically similar to Haskell, there are a few important changes to the semantics.
-The first, and most important, is that Curry computes by narrowing instead of rewriting.
-These terms will be defined formally later, but the effect is that the order of equation definitions does not matter
-in Curry as it does in Haskell.
-This allows us to write non-deterministic functions in Curry.
+Curry is syntactically similar to Haskell, however they are very different semantically.
+A Curry program is defined by as a collection of function, where each function is given a list of defining equations $lhs = rhs$.
+To avoid confusion with equations defined later, and because of their relation to rewrite rules, we refer to these equations as rules.
+A partial specification for the syntax of Curry is given below.
+While this specification is not complete, it is enough to describe the concepts in this dissertation.
 
-Consider the code:
+$$\begin{array}{llll}
+Program  & \to & (Data\ |\ Function)^* \\
+Data     & \to & \text{data}\ name = (name\ Type^*)\ (|\ name\ Type^*)^* \\
+Function & \to & name :: Type\ |\ Rule  \\
+Rule     & \to & name\ Pattern^* = Expr [\text{where}\ Rule^*] \\
+         & |   & name Pattern^* (| Expr = Expr )^* [\text{where}\ Rule^*] \\
+Pattern  & \to & constructor\ Pattern^*\ |\ variable\ |\ literal \\
+Expr     & \to & Expr\ Expr             & \text{function application}\\
+         & |   & name                  & \text{variable or function}\\
+         & |   & literal               & \text{number, boolean, or character}\\
+         & |   & Expr\ \text{op}\ Expr & \text{binary operation}\\
+         & |   & ( Expr )              & \\
+         & |   & \text{let}\ Rule\ \text{in}\ Expr  & \text{let expression}
+\end{array}$$
+
+Curry has three semantic categories for names in programs.
+A \textit{function name} is any name that is defined by $Function$, and a \textit{constructor name}
+is any name defined by $Data$.  All other names are variables.
+An expression is a \texttt{value} if it only contains constructor names or literals.
+There is a special function, which we call \texttt{main} that contains no arguments.
+A we run a Curry program by evaluating the \texttt{main} function.
+
+Those familiar with functional programming may be surprised when learning Curry.
+The first surprise is that the order of rules does not matter.
+We can define the following function.
 \begin{verbatim}
-fac 0 = 1
-fac n = n * fac (n-1)
+f 1 = 1
+f n = 2
 \end{verbatim}
 
-In Haskell, this is a reasonable definition of the factorial funciton; however, this definition does not work in Curry.
-If the argument is \texttt 0, then the first equation will be selected in Haskell.
-However, both equations will be selected in Curry.  This means that this definition will never terminate.
+While we may reasonably expect the expression \texttt{f 1} to evaluate to \texttt 1, this is not true in Curry.
+Curry will find every possible evaluation of an expression.
+Since \texttt{f 1} can also match the second rule, the expression is evaluated to both \texttt 1 and \texttt 2.
+This is an example of non-deterministic evaluation.
+A Curry program will evaluate an expression to every possible value.
 
 There is one important non-deterministic function in Curry.
-The \texttt{?} function will non-deterministically select one of its two operands.
+The ``\texttt{?}'' function will non-deterministically select one of its two operands.
 We define the function as
 
 \begin{verbatim}
@@ -39,7 +65,7 @@ x ? y = y
 This function allows us to construct non-deterministic expressions without defining new functions.
 It will be used repeatedly throughout the rest of this proposal.
 
-We further extend non-determinism with free variables.
+Another surprise in Curry is the addition of \textit{free variables}.
 A free variable is not given a value in the function, however its value may be constrained.
 
 Consider the function:
@@ -53,85 +79,91 @@ The variables \texttt{ys} and \texttt y are free, so their value is not determin
 However we made the constraint that \texttt{ys ++ [y]} is equal to the input.
 This ensures that \texttt y is the final element of the list.
 
-A final extension from Haskell to Curry is that expressions are allowed to fail.
+A final surprise is that expressions are allowed to fail.
 An expression fails if it cannot produce a value.
 For example \texttt{head []} will fail, because you cannot take the head of an empty list.
 If we have a non-deterministic expression \texttt{a ? b} and \texttt a fails, then Curry will only return the result of \texttt b.
+We frequently use the behavior to constrain non-deterministic expression by defining equations.
+Consider the following rule:
+\begin{verbatim}
+invert f y
+ | f x =:= y = x
+   where x free
+\end{verbatim}
 
-There are many other extensions to Curry including functional patterns, default rules, and set functions, however
-these can be converted to standard Curry, so they are not relavant to this thesis.
+This \texttt{invert} function asks for all solutions \texttt x such that the equation \texttt{f x == y} is satisfied.
+There are many other extensions to Curry including functional patterns and default rules, however
+these can be converted to standard Curry, so they are not relevant to this thesis.
 
 
 \subsection{Evaluation}
 
 In order for Curry to be a useful programming language, we must be able to run Curry programs.
-The theory of functional logic programming is rooted firmly in term rewriting \cite{}, and graph rewriting \cite{} in particular.
+The theory of functional logic programming is rooted firmly in term rewriting \cite{Klop92Handbook, Terese03}, 
+and graph rewriting \cite{Plump99Handbook, EchahedJanodet97IMAG} in particular.
 Rewriting is a purely syntactic system for transforming expressions based entirely on a set of \textit{rewrite rules}.
-In Curry, the rewrite rules correspond to the functions.
+In Curry, the rewrite rules correspond to the function rules.
 As an example, if we have \texttt{reverse [1,2] ++ reverse [3,4]},
-then this can rewrite to \texttt{[2] ++ reverse [1] ++ reverse [3,4]}.
+then this can rewrite to \texttt{([2] ++ reverse [1]) ++ reverse [3,4]}.
 Rewriting continues until the expression is in a \textit{normal form}, a form in which no more rewriting can be done.
-There are many questions at this point.  What happens if more than one possible rewrite rule applies?
-What happens if two terms share a variable when rewriting?  What happens if there is no normal form?
-We are going to sidestep all of these questions, and use an established rewriting strategy for Curry programs.
+In Curry, normal forms are values or failed computations.
 
-Curry programs are evaluated using the \textit{needed narrowing} rewriting strategy.
-This strategy is lazy, because we don't rewrite an expression until it is required.
-It has also been shown to be optimal in the number of rewrite steps \cite{Needed}.
+Formally, a Curry expression is a rooted, labeled, directed graph.  Each node has a label, name, and a list of children.
+If $e$ is an expression, then a subexpression $s$ of $e$ is a subgraph of $e$ 
+such that $s$ has a root, and there is no edge from a node in $s$ to any other node in $e$.
+In other words, a subexpression must also be an expression.
+A \textit{path} from the root of $e$ to the root of a subexpression $s$ is a sequence of integers such that
+the first integer corresponds to a child $c$ of the root of $e$, and the rest of the sequence is a path from $c$ to $s$.
+We write $e|_p = s$ to say the there is a path, $p$, from the root of $e$ to the root of $s$.
+The notation $e[r]_p$ means: replace the subexpression at position $p$ with expression $r$,
+where replacement is defined in the usual way.
 
-An expression in Curry is a graph, where each node has a name, an arity (number of arguments),
-and a set of children.
-The number of children will match the arity of each node.
-For example a \texttt{++} node will have two children, while a constant such as \texttt{pi} will have zero children.
-We divide the set of nodes into three categories:
-function symbols, nodes that have a rewrite rule; constructors, nodes that don't have a rewrite rule; and variables.
-We can think of constructors as constructing data structures, like they do in Java, but that isn't relevant to the theory.
+A rewrite rule $l \to r$ can be applied to an expression $e$, if there is a subexpression $s$, such that $l = s$.
+We write $e\to_{l \to r, p} e'$ to mean a rewrite step where we replace the subexpression at $p$ with the $r$.
+A \textit{narrowing step} is a rewrite step where we unify \cite{Klop92Handbook} $s$ and $l$ with substitution $\sigma$,
+then we replace $s$ with $\sigma(r)$.
+We write $e\rightsquigarrow_{l \to r, p, \sigma} e'$ to mean $e$ narrows to $e'$,
+with rule $l \to r$, at position $p$, using substitution $\sigma$.
 
-A Curry program is a set of functions, where each function is defined by equations.
-These equations define the rewrite rules for that function.
-A rewrite rule consists of a function symbol, zero or more parameters, and an expression to rewrite to, which is known as the contractum.
-When rewriting a function symbol, we look up the corresponding equation, 
-find a rule that applies, and replace the function symbol with that rule's contractum.
-We determine which rules apply through pattern matching.
-
-The needed narrowing strategy gives us the process for selecting the correct rule.
-The basic idea is to construct a pattern matching tree out of all of the rules for a function.
-Each branch of the tree contains a pattern position in an expression where the pattern match will occur.
-Every child of the branch will either be a possible constructor, a failure, or a rewrite rule.
-This allows us to rewrite an expression simply by traversing the tree.
-This is known as a definitional tree.
-The details of this construction can be found in \cite{defTree}
-
-As an example, consider the rules for append:
+This is a lot of notation, so lets apply it to the reverse example above.
+The defining rules for \texttt{reverse} and \texttt{++} are:
 \begin{verbatim}
-append [] ys = ys
-append (x:xs) ys = x : append xs ys
+reverse [] = []
+reverse (x:xs) = reverse xs ++ [x]
+
+[] ++ ys = ys
+(x:xs) ++ ys = x : (xs ++ ys)
 \end{verbatim}
 
-\noindent
-The definitional tree would be 
+Now, if we want to apply a narrowing step to the expression \texttt{reverse [1,2] ++ reverse [3,4]}, we need to find a
+subexpression that will unify with a rule.
+The only subexpression we can pick is \texttt{reverse [1,2]} to unify with \texttt{reverse (x:xs)}.
+This subexpression is at position $1$ of the expression, since it is on the left hand side of \texttt{++}.
+Our substitution is $\sigma = \{x \to 1, xs = [2]\}$.
+Finally, our rewrite step is 
+\texttt{reverse [1,2] ++ reverse [3,4]}\\
+$\rightsquigarrow_{reverse\ (x:xs) \to reverse\ xs ++ [x], [1], \{x \to 1, xs \to [2]\}}$\\
+\texttt{(reverse [2] ++ [1]) ++ reverse [3,4]}.
 
-put picture of tree here.
+Now with this terminology, evaluating a Curry expression is actually very simple.
+First, find a rewrite rule where the left hand side will unify with a subexpression,
+then narrow the expression using that rule.
+Repeat this process until a normal form is found.
 
-\noindent
-This makes the definition of evaluation very simple:
+The astute reader may have noticed that I didn't say anything about how we pick the rule.
+The process of selecting rules is called the \textit{rewriting strategy}.
+We use a needed narrowing rewriting strategy \cite{needed}.
+We omit most of the details, because they're long, complicated, and not relevant to an optimizing compiler.
+The idea is that we combine all of the rules for each function into a definitional tree \cite{Antoy92ALP}.
+This is a pattern matching tree with some special properties.
+Definitional trees are relevant, because the current intermediate representation, FlatCurry, is a textual representation of a
+definitional tree.
 
-\begin{verbatim}
-eval(e)
-  if e is a normal form
-    return e
+As an example of a definitional tree, we use the append function from above.
 
-  if e = C(x1,x2,... xn) where C is a constructor
-    return C (eval c1) (eval x2) ... (eval xn) 
+\Tree[.xs++ys [.[]++ys ys ] [.(x:xs)++ys x:(xs++ys) ] ]
 
-  if e = f(x1,x2,... xn) where f is a funciton symbol
-    match x1,x2, ... xn on f's definitional tree
-    rewrite f with all rules that apply
-    return a copy for each rule that applied
-\end{verbatim}
-
-This is a very naive way to interpret a Curry program.
-This compiler does no work to make sure that expressions are evaluated efficiently,
-or even that terminating expressions will produce an answer.
-There has been some work to use other compiler to optimize Curry programs.
+While the needed narrowing strategy has been proven optimal in the number of rewrite steps,
+there is a lot more we can do to ensure that each rewrite step is computed efficiently.
+There has been some attempts to use other compilers to optimize Curry programs.
 Unfortunately, this has led to mixed results.

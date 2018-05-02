@@ -1,10 +1,19 @@
 
-\begin{itemize}
-  \item an optimizing curry compiler, from source (or flat-curry) to executable code.
-  \item justification for the correctness of optimizations
-  \item evaluation against current curry compilers
-  \begin{itemize}
-    \item determine runtime/memory usage on ``real world'' programs
-    \item test on multiple machines/environments
-  \end{itemize}
-\end{itemize}
+In order to demonstrate that I have completed the requirements for this presentation, I will deliver three products .
+First, I will deliver an optimizing Curry compiler that implements the optimizations described in this paper.
+While the compiler itself will be a physical product, I also intend to provide a logical framework
+in which it is easy to write and test new optimizations.
+Second, I will prove the correctness of each optimization.
+Finally, I will demonstrate the efficiency of the compiler by comparing it to both an unoptimized compiler
+and current Curry compilers.
+
+While I believe the first two parts are self-explanatory, the final part will require more care.
+Determining the efficiency of an optimization can be a tricky task, as Mytkowicz et al. showed \cite{wrongData}.
+There is a possibility that we could use the STABILIZER platform \cite{STABILIZER} to alleviate these issues
+Aside from the issues that Mytkowicz et al. raise, I also need to demonstrate that the optimizations are effective.
+While I could just compare the performance to standard Curry compilers, I also plan to test each optimization in combination.
+This will tell me which optimizations are effective, and which are redundant.
+As an example, it may be that deforestation and shortcutting both optimize the same cases,
+so, while it looks like they both provide a significant improvement, they may not perform as well in combination.
+
+
