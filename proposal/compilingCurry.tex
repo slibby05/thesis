@@ -1,10 +1,7 @@
 
 \subsection{Curry Evaluation Model}
 
-Currently, there are three compilers for Curry:
-Pakcs, which compiles Curry into Prolog;
-Kics2, which compiles Curry into Haskell;
-and Sprite, which compiles Curry into LLVM code.
+Pakcs, Kics2, and Sprite all have their own strategy for compiling Curry.
 While these compilers all compile to different languages,
 the more important difference is how they handle non-determinism.
 In this section I'll take an in-depth look at these compilers,
@@ -50,7 +47,7 @@ sum(Arg,Result,Start,End) :- hnf(Arg, HArg, Start, Mid),
 
 sum_1([],      0,       End,   End).
 sum_1([X|XS],  Result,  Start, End) :- !, 
-    hnf(+(X, sum_F(XS)),Result,Start,End).
+    hnf(+_F(X, sum_F(XS)),Result,Start,End).
 sum_1(fail(F), fail(F), End,   End) :- nonvar(F).
 \end{verbatim}
 
@@ -83,7 +80,7 @@ Here each function is compiled in a manner similar to \texttt{sum}.
 There are a few inherent inefficiencies in this style of compilation.
 First, we construct several nodes that we don't need.
 For example, if we evaluate the expression \texttt{sum [2]} we will produce the intermediate result.
-\texttt{hnf(+(2, sum\_F([])), R, S, E)}.
+\texttt{hnf(+\_F(2, sum\_F([])), R, S, E)}.
 There is no reason to construct the \texttt + node.
 Second, every expression that does not directly produce a value makes a call to the \texttt{hnf}
 predicate.
@@ -126,22 +123,27 @@ As an example the expression \texttt{sum ([1] ? [2])} will match the \texttt{Cho
 \texttt{Choice cd i (sum l cd cs) (sum r cd cs)}.
 Note that \texttt{(sum l cd cs)} and \texttt{(sum r cd cs)} will not be evaluated due to Haskell's laziness.
 
-
+There is a non-obvious consequence of this compilation strategy.
+Every function that pattern matches in Kics2 contains a case for \texttt{Choice}.
+Since \texttt{Choice} is a constructor, it is a head normal form in Haskell.
+Therefore If a choice is ever generated,
+it will immediately percolate up to the root of the expression.
+This will copy every node above the node in the expression.
 
 \subsection{Sprite}
 The final Curry compiler is Sprite \cite{AntoyJost16LOPSTR}.
 Sprite compiles Curry to LLVM assembly code, and uses a pull tabbing scheme.
 The difference between Sprite and Kics2 is that Sprite uses the Fair Scheme \cite{fair_scheme} for executing choices.
-The preliminary results for Sprite look promising. 
-Unfortunately,  it isn't mature yet and thus would not be a good implementation target for my research.
+The preliminary results for Sprite look promising.
+Unfortunately, since Sprite isn't complete, I can't make any meaningful comparisons to other compilers.
 
 \subsection{Graph Rewriting vs Graph Reduction}
-These compilers show the two different ideas of compiling functional programs.
+These compilers show the two different ideas of compiling lazy functional programs.
 Pakcs compiles all of the Curry functions into rewrite rules.
 Expressions are rewritten until they reach a normal form.
 The alternative to graph rewriting is graph reduction.
 The idea is that the graph knows how to reduce itself to a normal form.
-This is the approach commonly taken by functional language compilers.
+This is the approach commonly taken by lazy functional language compilers.
 Each node in the graph contains a pointer to code that will compute a value in head normal form for that node.
 These nodes with code pointers are commonly known as closures.
 
@@ -152,7 +154,7 @@ but that is not the focus of this research.
 
 \subsection{Compilation}
 In order to optimize Curry, I need to have a well founded compilation model.
-While I have looked at a few compilation models, I would like to present a new one.
+While my research should apply to every Curry compiler, I would like to present a different model of compilation.
 This model has two main goals: simplicity, and efficiency.
 I do not claim that this is the best model for Curry, but it is easy to understand, and reasonably efficient.
 
@@ -193,24 +195,72 @@ This is true. Some computations will not find a result,
 however the purpose of this compiler is to demonstrate the improvement gained in optimizations.
 If the program doesn't finish executing, then it could not be compared to a program that finished.
 
+\subsection{?}
+
+So far there is one major issue that I've swept under the rug.
+Graph reduction and backtracking are both well understood individually,
+however there is an issue when trying to combine the two.
+
+In a graph rewriting system backtracking is straightforward.
+If node $l$ rewrites to node $r$, then we push $(l,r)$ onto a global backtracking stack.
+When it comes time to backtrack we simply pop each $(l,r)$ pair from the stack, and
+replace the node $r$ with $l$ until we pop a node where $l$ was a choice.
+At this point the graph is in the same state it was before the choice was taken.
+
+While this works great, the whole point of using graph reduction over graph rewriting
+is to avoid constructing intermediate nodes when evaluating an expression to head normal form.
+If a node isn't constructed, then we can't backtrack to it.
+One solution to this problem is to identify a set of nodes that must be copied for backtracking.
+It is likely impossible to implement non-determinism without creating and copying some nodes,
+but this compiler should aim to minimize that copying.
 
 \subsection{Compiler Pipeline}
 Since I am demonstrating the value of optimizations, I can reuse existing pieces of Curry compilers.
 Currently, every Curry compiler produces an intermediate representation known as FlatCurry.
-A FlatCurry program represents a Curry program, after the transformation to definitional trees has been made.
+A FlatCurry program represents a Curry program,
+after the transformation to definitional trees has been made.
 
-While FlatCurry is an intermediate representation, it is not well suited to optimization.
-A large part of this dissertation will involve developing an IR that is sufficient for optimizing Curry programs.
+FlatCurry is similar to the Core language in GHC.
+There are new cases for free variables and non-deterministic expressions.
+A partial specification of FlatCurry is given below.
+
+
+$$\begin{array}{lll}
+Prog     & = & Prog\ name\ imports\ Type^*\ Function^*\ Op^* \\
+\ldots   &   & \\
+Function & = & Func\ name\ arity\ visibility\ Type\ Rule \\
+Rule     & = & Rule\ var^*\ Expr \\
+Expr     & = & Var\ var \\
+         & | & Lit\ literal \\
+         & | & Comb\ CombType\ name\ Expr^* \\
+         & | & Let\ (var, Expr)^*\ Expr\\
+         & | & Free\ var^*\ Expr\\
+         & | & Or\ Expr\ Expr \\
+         & | & Case\ CaseType\ Expr\ (Pattern^*, Expr)^* \\
+CombType & = & functionAp | constructorAp  \\
+         & | & partFuctionAp | PartConstructorAp \\
+Pattern  & = & Pattern\ name\ var^* \\
+         & | & LPattern\ literal \\
+
+\end{array}
+$$
+
+While FlatCurry is an intermediate representation, it is not well suited to some optimizations.
+An important part of this dissertation will involve developing an IR that is suitable
+for optimizing Curry programs.
 An appropriate IR should represent the basic operations to evaluate a program.
 In imperative languages, IRs are similar to assembly code.
-In functional languages, IRs are variants of lambda calculus, where the fundamental operation is function application.
+In functional languages, IRs are variants of lambda calculus,
+where the fundamental operation is function application.
 In logic languages, the WAM uses replacement and choices as its fundamental operations.
 While I might want to use a combination of lambda calculus and the WAM, this does not seem like the right abstraction.
 Furthermore, the WAM is designed for a backtracking system, so this would not be a general solution.
 
 Instead, I propose an IR based on graph rewriting.
-This is not an entirely new idea \cite{graph_ir, dactl}, 
-but, to my knowledge, no one has used an IR based on graph rewriting for optimization.
+This is not a new idea \cite{graph_ir, dactl, functional_PeytonJones}.
+In fact, this was one of the major innovations behind the G-machine.
+While the STG-machine is an IR for a graph reduction machine, it is still framed in terms
+of lambda calculus.
 This IR would be a variation on the ICurry language \cite{AntoyJost16LOPSTR}.
 Currently the IR is not able to incorporate all of the optimizations.
 However, I believe that this IR is a good starting place for optimizing Curry.

@@ -6,12 +6,12 @@ Curry is an attempt to unify both of these approaches as a functional logic lang
 
 Curry is by no means the first language to integrate the ideas of functional and logic programming.
 On the logic side, Mercury \cite{mercury} and HAL \cite{hal} included a type system and higher order functions;
-Caio \cite{caio}, a dialect of Prolog, added notation for functions;
+Ciao \cite{caio}, a dialect of Prolog, added notation for functions;
 OZ \cite{oz} also included support for both functional and logic programming;
 and the Toy programming language \cite{toy} adds support for lazy functional logic programming in a Prolog-like syntax.
 Curry \cite{Hanus16Curry} is a modern functional logic language with Haskell-like syntax.
 
-Curry is syntactically similar to Haskell, however they are very different semantically.
+Curry is syntactically similar to Haskell, however there are a few differences semantically.
 A Curry program is defined by as a collection of function, where each function is given a list of defining equations $lhs = rhs$.
 To avoid confusion with equations defined later, and because of their relation to rewrite rules, we refer to these equations as rules.
 A partial specification for the syntax of Curry is given below.
@@ -35,9 +35,9 @@ Expr     & \to & Expr\ Expr             & \text{function application}\\
 Curry has three semantic categories for names in programs.
 A \textit{function name} is any name that is defined by $Function$, and a \textit{constructor name}
 is any name defined by $Data$.  All other names are variables.
-An expression is a \texttt{value} if it only contains constructor names or literals.
+An expression is a \textit{value} if it only contains constructor names or literals.
 There is a special function, which we call \texttt{main} that contains no arguments.
-A we run a Curry program by evaluating the \texttt{main} function.
+We run a Curry program by evaluating the \texttt{main} function.
 
 Those familiar with functional programming may be surprised when learning Curry.
 The first surprise is that the order of rules does not matter.
@@ -93,7 +93,7 @@ invert f y
 
 This \texttt{invert} function asks for all solutions \texttt x such that the equation \texttt{f x == y} is satisfied.
 There are many other extensions to Curry including functional patterns and default rules, however
-these can be converted to standard Curry, so they are not relevant to this thesis.
+they are not relevant to this thesis.
 
 
 \subsection{Evaluation}
@@ -104,11 +104,11 @@ and graph rewriting \cite{Plump99Handbook, EchahedJanodet97IMAG} in particular.
 Rewriting is a purely syntactic system for transforming expressions based entirely on a set of \textit{rewrite rules}.
 In Curry, the rewrite rules correspond to the function rules.
 As an example, if we have \texttt{reverse [1,2] ++ reverse [3,4]},
-then this can rewrite to \texttt{([2] ++ reverse [1]) ++ reverse [3,4]}.
+then this can rewrite to \texttt{(reverse [2] ++ [1]) ++ reverse [3,4]}.
 Rewriting continues until the expression is in a \textit{normal form}, a form in which no more rewriting can be done.
 In Curry, normal forms are values or failed computations.
 
-Formally, a Curry expression is a rooted, labeled, directed graph.  Each node has a label, name, and a list of children.
+Formally, a Curry expression is a rooted, labeled, directed graph.  Each node has a label and a list of children.
 If $e$ is an expression, then a subexpression $s$ of $e$ is a subgraph of $e$ 
 such that $s$ has a root, and there is no edge from a node in $s$ to any other node in $e$.
 In other words, a subexpression must also be an expression.
@@ -118,10 +118,11 @@ We write $e|_p = s$ to say the there is a path, $p$, from the root of $e$ to the
 The notation $e[r]_p$ means: replace the subexpression at position $p$ with expression $r$,
 where replacement is defined in the usual way.
 
-A rewrite rule $l \to r$ can be applied to an expression $e$, if there is a subexpression $s$, such that $l = s$.
-We write $e\to_{l \to r, p} e'$ to mean a rewrite step where we replace the subexpression at $p$ with the $r$.
+A rewrite rule $l \to r$ can be applied to an expression $e$, if there is a subexpression $s$, such that $\sigma(l) = s$
+for some substitution $\sigma$.
+We write $e\to_{l \to r, p, \sigma} e'$ to mean a rewrite step where we replace the subexpression at $p$ with the $\sigma(r)$.
 A \textit{narrowing step} is a rewrite step where we unify \cite{Klop92Handbook} $s$ and $l$ with substitution $\sigma$,
-then we replace $s$ with $\sigma(r)$.
+then we replace $\sigma(s)$ with $\sigma(r)$.
 We write $e\rightsquigarrow_{l \to r, p, \sigma} e'$ to mean $e$ narrows to $e'$,
 with rule $l \to r$, at position $p$, using substitution $\sigma$.
 
@@ -141,9 +142,10 @@ The only subexpression we can pick is \texttt{reverse [1,2]} to unify with \text
 This subexpression is at position $1$ of the expression, since it is on the left hand side of \texttt{++}.
 Our substitution is $\sigma = \{x \to 1, xs = [2]\}$.
 Finally, our rewrite step is 
-\texttt{reverse [1,2] ++ reverse [3,4]}\\
-$\rightsquigarrow_{reverse\ (x:xs) \to reverse\ xs ++ [x], [1], \{x \to 1, xs \to [2]\}}$\\
-\texttt{(reverse [2] ++ [1]) ++ reverse [3,4]}.
+\texttt{reverse [1,2] ++ reverse [3,4]}
+$\rightsquigarrow_{R , p, \sigma}$
+\texttt{(reverse [2] ++ [1]) ++ reverse [3,4]}
+where $R = reverse\ (x:xs) \to reverse\ xs \mpp [x]$, $p = [1]$, and $\sigma = \{x \to 1, xs \to [2]\}$.
 
 Now with this terminology, evaluating a Curry expression is actually very simple.
 First, find a rewrite rule where the left hand side will unify with a subexpression,
@@ -154,7 +156,17 @@ The astute reader may have noticed that I didn't say anything about how we pick 
 The process of selecting rules is called the \textit{rewriting strategy}.
 We use a needed narrowing rewriting strategy \cite{needed}.
 We omit most of the details, because they're long, complicated, and not relevant to an optimizing compiler.
-The idea is that we combine all of the rules for each function into a definitional tree \cite{Antoy92ALP}.
+
+There are two relevant ideas from the needed narrowing strategy.
+The first is that needed narrowing is a lazy narrowing strategy.
+Curry programs follow the constructor discipline.
+The symbols are partitioned into two sets: 
+functions symbols which have an associated rewrite rule,
+and constructor symbols which do not.
+An expression is in head normal form if it is rooted by a constructor.
+A lazy narrowing strategy rewrites expressions to head normal form,
+
+The second idea is that we can combine all of the rules for each function into a definitional tree \cite{Antoy92ALP}.
 This is a pattern matching tree with some special properties.
 Definitional trees are relevant, because the current intermediate representation, FlatCurry, is a textual representation of a
 definitional tree.

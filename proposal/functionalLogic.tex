@@ -9,7 +9,7 @@ While this can work, the theory is messy.
 Modern functional logic languages attempt to unify the two concepts from the ground up.
 Functional logic programs are thought of as term, and graph, rewrite system.
 Computation in functional logic programs is done through narrowing.
-There has been a lot of research into devising an optimal narrowing algorithm;
+There has been a lot of research into devising an optimal narrowing strategy;
 however, there has been little work done on optimizing programs themselves.
 
 One of the first functional logic languages is ALF \cite{alf}.
@@ -17,7 +17,8 @@ ALF integrates functional and logic programming using a graph rewrite system.
 Computations in ALF use innermost narrowing, which is similar to eager evaluation.
 ALF also had several restrictions. 
 For example, functions had to be confluent and terminating.
-ALF compiled to a variant of WAM, although there was no attempt at making ALF-specific optimizations.
+ALF compiled to a variant of the WAM, 
+although there was no attempt at making ALF-specific optimizations.
 
 KLEAF took a different approach, and compiled to a flat intermediate language, 
 and then used SLD-resolution to compute answers \cite{kleaf}.

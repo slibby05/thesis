@@ -17,13 +17,13 @@ I will show that it is possible to apply the optimizations of unboxing, deforest
 Furthermore, these optimizations will improve the performance of Curry programs.
 
 Functional logic programming is a very powerful technique for expressing complicated ideas in a simple form.
-Curry, a modern functional logic language, implements these ideas with a clean, easy to read syntax.
-Syntactically, Curry is very similar to Haskell, a well known functional programming language.
-Curry is also lazy, so evaluation of Curry programs is similar to evaluation of Haskell programs.
+Curry implements these ideas with a clean, easy to read syntax.
+Curry is syntactically very similar to Haskell, a well known functional programming language.
+Curry is also lazy, so evaluation of Curry programs is similar Haskell as well.
 Curry extends Haskell with two new concepts.
-First, there is idea of a non-deterministic function, ``\texttt{?}''.  
+First, there are non-deterministic functions, such as ``\texttt{?}''.  
 Semantically \texttt{a ? b} will evaluate \texttt{a} and \texttt{b} and will return both answers to the user.
-Second, there is the idea of free, or logic, variables.
+Second, there are free, or logic, variables.
 A free variable is a variable that is not in the scope of the current function.
 The value of a free variable is not defined, but it may be constrained.
 
@@ -37,7 +37,7 @@ Here \texttt{ys} is a free variable, and it has two constraints:
 \texttt{ys} must be a permutation of \texttt{xs}, and \texttt{ys} must be sorted.
 
 Free variables are given concrete values in Curry programs through narrowing.
-The semantics of narrowing and non-determinism in Curry are given in \cite{Antoy97ALP}
+The semantics of narrowing and non-determinism in Curry are given by Antoy et al. \cite{Antoy97ALP}
 
 There are currently two mature Curry compilers, Pakcs and Kics2.
 Pakcs compiles Curry to Prolog in an effort to leverage Prolog's non-determinism and free variables.

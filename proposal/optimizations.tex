@@ -50,6 +50,8 @@ small pieces of memory.
 One way to improve Curry performance is to reduce the number of nodes that are created and destroyed.
 To that end, I've picked three optimizations to implement: unboxing, deforestation, and shortcutting.
 
+\subsection{Unboxing}
+
 Boxing refers to abstracting primitive data types in order to make a uniform representation of data.
 This is a very common process in programming languages.  It makes development of the compiler easier,
 and it reduces hard-to-find errors.
@@ -64,18 +66,101 @@ Hall et al. showed that unboxing can be implemented using partial evaluation \ci
 It remains to be shown that unboxing can be implemented with non-deterministic values.
 This seems reasonable, since non-deterministic values can behave like unevaluated expressions.
 
+\subsection{Deforestation}
 Deforestation is an optimization technique that originated with functional programming \cite{deforestation_wadler}.
 The idea is that there are many functional programs that produce intermediate data structures, and immediately consume them.
 Deforestation will rewrite these functions so that they do not create these data structures.
-Wadler showed the initial deforestation transformation \cite{deforestation_wadler}, and 
-Launchbury et al. showed how this transformation could simplified \cite{shortcut_deforestation}.
+Wadler showed the initial deforestation transformation \cite{deforestation_wadler}.
+While this transformation removed all intermediate structures, it was only applicable to a limited set of programs.
+Launchbury et al. showed how this transformation could simplified and expanded to a wider class of programs \cite{shortcut_deforestation}.
+Unfortunately this transformation isn't guaranteed to remove every intermediate stricture.
+Currently, the standard deforestation technique is known as stream fusion.
+This has been shown to be more effective than shortcut deforestation, 
+but is requires re-writing much of the standard library \cite{stream}.
 While the implementation of deforestation should be straightforward,
 it remains to be shown the deforestation is still valid for non-deterministic expressions.
 
+To see how deforestation works, consider the code for \texttt{all}:
+\begin{verbatim}
+all p xs = and (map p xs)
+\end{verbatim}
+While this code is correct, it's not optimal.
+If we start with the list \texttt{[x0, x1, ... xn]}, then \texttt{map p} will produce the intermediate list
+\texttt{[p x0, p x1, ... p xn]}.
+Then finally we fold all of those values with all.
+
+We could instead write the code:
+\begin{verbatim}
+all p xs = h xs
+ where h [] = True
+       h (y:ys) = p y && h ys
+\end{verbatim}
+This is less obviously correct, but it is more efficient.  We won't create the intermediate list.
+We would like the compiler to automatically transform the first version into the second version.
+We can accomplish this by recognizing that \texttt{and} and \texttt{map} can be implemented using \texttt{foldr} and \texttt{build}
+respectively.
+
+\begin{verbatim}
+and = foldr (&&) True
+map f xs = build (\c n -> foldr (\a b -> c (f a) b) n xs)
+\end{verbatim}
+
+Then we can apply the rule \texttt{foldr f z (build g) = g f z}.  This will produce the code
+\begin{verbatim}
+all p xs = foldr (&&) True (build (\c u -> foldr (\a b -> c (p a) b) n xs))
+         = (\c n -> foldr (\a b -> c (p a) b) n xs) (&&) True 
+         = foldr (\a b -> (p a) && b) True xs
+\end{verbatim}
+Substituting the definition for \texttt{foldr} we see that \texttt{all} reduces to:
+\begin{verbatim}
+all p xs = h xs
+ where h [] = True
+       h (y:ys) = (p a) && h ys
+\end{verbatim}
+This is the code we wanted originally.
+
+\subsection{Shortcutting}
 Shortcutting is a relatively recent idea for optimizing functional logic programs \cite{shortcutting}.
 It is similar to the idea of deforestation, in that we are avoiding the construction of intermediate data structures.
 However, the goal of shortcutting is to avoid the construction of intermediate function nodes.
 Shortcutting has been shown to be effective in theory, but has yet to be implemented in a full compiler.
+
+The idea is straightforward, however is it dependent on the compilation strategy for Curry.
+When a function in Curry is compiled, code is generated to reduce that function symbol to head normal form.
+Usually this code is uniform, and we represent it with the function $\H$.
+
+\noindent
+As an example:\\
+$\H(length([])) = 0$\\
+$\H(length(x:xs)) = \H(+(1,length(xs)))$\\
+$\H(length(xs)) = \H(length(\H(xs)))$\\
+$\H([]++ys) = \H(ys)$\\
+$\H((x:xs)++ys) = x : (xs++ys)$\\
+$\H(xs++ys) = \H(\H(xs) ++ ys)$\\
+
+It's clear that we're creating more nodes then we need to.
+For example, in the second rule for $\H(length)$ we create the node $+$ only to immediately evaluate it.
+It would be beneficial if we could just execute the code for $+$ directly.
+We accomplish this in two steps.
+First we generate a separate reduction function for each type of node,
+and second we allow a node to call other reduction functions.
+The effect of this is that we don't need to construct nodes that we will immediately reduce.
+Instead, we just call their reduction function.
+
+For example, the compiled code for length would become:\\
+$\Hf{length}([]) = 0$\\
+$\Hf{length}(x:xs) = \Hf{+}(1, xs)$\\
+$\Hf{length}(xs) = \H_{length}(\H(xs))$\\
+
+The justification for this transformation is given in \cite{shortcutting}.
+This transformation has been shown to speed up programs significantly over the naive version.
+I also expect this optimization to work well with other optimizations.
+
+It should be mentioned that other lazy functional languages can get an effect similar to this,
+but it requires either inlining the function call,
+or separate rules for compiling built in functions \cite{functional_PeytonJones}.
+The shortcutting approach is conceptually simpler, and more general.
+However, it comes at the cost of the size of the generated code.
 
 All three of these optimizations are focused on saving memory.
 While there are many other possible optimizations, I believe that these will be effective in a real Curry compiler.
