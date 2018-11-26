@@ -1,0 +1,56 @@
+
+There is a long history of functional programming with many different languages.
+However, my concern here is strictly the development of functional compiler technology,
+so I will instead focus on the compilers and abstract machines used to run functional languages.
+
+The first real implementation of a functional language was LISP \cite{lisp}.
+This was implemented with an interpreter.
+While it would late be compiled to more efficient versions \cite{steele78,orbit},
+LISP was not considered very practical.
+
+Further implementations would compile a functional language to an abstract machine.
+This filled the role of an intermediate representation for functional languages.
+Landin's ISWIM language introduced an abstract machine known as the SECD machine \cite{secd}.
+This machine was an attempt to define the basic operations of a functional language.
+Further improvements were made by Felleisen and Friedman, who produced the CEK machine which is still used in the Racket
+programming language \cite{cek}.
+
+While strict functional languages were developing optimizing compilers,
+there was a call for lazy functional languages \cite{cons-args}.
+The problems raised by lazy evaluation lead to several new approaches to compilers
+and intermediate representations.
+One of these approaches was to compile to supercombinators,
+or functions that contain no free variables.
+The most influential version was the TIM (Three Instruction Machine) \cite{tim}.
+Although this was easier to implement, it is commonly believed to be inefficient compared to other machines.
+
+The final approach to compiling lazy functional languages is to treat it as a problem in
+graph rewriting.
+While naive implementations of graph rewriting compilers often resemble interpreters,
+there are many optimizations that can be made to improve performance.
+The most prominent graph rewriting compilers
+is the graph reduction machine, or g-machine \cite{gmachine},
+which was used in the Miranda language. 
+Two optimizations of the g-machine are removing the spines of functions,
+and removing tags identifying nodes in the graphs.
+The spine of a function is a sequences of function application
+nodes for functions with more than one argument.
+These are very common, and add several steps to evaluating any function.
+Together the two optimizations resulted in the spineless tagless G-machine,
+which is used in the Glasgow Haskell Compiler \cite{functional_PeytonJones, ghc}.
+
+Along with abstract machines, there were several advancements for optimizing programming languages.
+Several optimizations, such as constant folding, could be translated immediately to functional languages.
+Several more optimizations came from early scheme compilers: Steel's Rabbit compiler, and Kranz' Orbit compiler \cite{steele78,orbit}.
+Steel showed how several common constructs in programming languages could be translated into lambda calculus 
+\cite{ultimate_imperative, ultimate_declarative},
+which allowed for lambda calculus to function as an intermediate language that could be optimized.
+Later Steel showed how lambda calculus could be implemented efficiently \cite{ lambda_rename_steel, lambda_goto}.
+
+One of the optimizations in Rabbit and Orbit was the use of Continuation Passing Style as an intermediate representation.
+This allowed several dataflow optimizations to be performed more easily, and is similar to SSA 
+for imperative languages \cite{continuations_appel}.
+Later, Flanagan and Felleisen, among others, refined CPS by removing ``administrative redexes'' to Administrative Normal Form
+\cite{anormal_Flanagan}.
+This representation is commonly used in modern functional compilers, and is the basis for the STG-machine \cite{stg-peytonJones}.
+

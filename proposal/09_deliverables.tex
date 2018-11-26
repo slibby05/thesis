@@ -1,0 +1,74 @@
+
+In order to demonstrate that I have completed the requirements for this presentation,
+I will deliver three products .
+First, I will deliver an optimizing Curry compiler 
+that implements the optimizations described in this paper.
+While the compiler itself will be a physical product, I also intend to provide a logical framework
+in which it is easy to write and test new optimizations.
+Second, I will prove the correctness of each optimization.
+Finally, I will demonstrate the efficiency of the compiler 
+by comparing it to both an unoptimized compiler
+and current Curry compilers.
+
+While I believe the first two parts are self-explanatory, the final part will require more care.
+Determining the efficiency of an optimization can be a tricky task,
+as Mytkowicz et al. showed \cite{wrongData}.
+There is a possibility that we could use the STABILIZER
+platform \cite{STABILIZER} to alleviate these issues
+Aside from the issues that Mytkowicz et al. raise,
+I also need to demonstrate that the optimizations are effective.
+
+While I could just compare the performance to standard Curry compilers,
+I also plan to test each optimization in combination.
+This will tell me which optimizations are effective, and which are redundant.
+As an example, it may be that deforestation and unboxing both optimize the same cases,
+so, while it looks like they both provide a significant improvement,
+they may not perform as well in combination.
+
+\subsection{completed work}
+
+Writing an optimizing compiler for any language is a daunting task.
+In order to complete this project in a reasonable timeframe I need a plan.
+Fortunately I've already completed a substantial amount of work.
+
+So far my most substantial contribution has been identifying
+areas in the Pakcs and Kics2 compiler that are inefficient.
+This is important for identifying what optimizations will be most beneficial.
+I have also developed a graph reduction strategy for Curry programs,
+and a transformation from FlatCurry to C code.
+This strategy is entirely correct for deterministic programs,
+and I believe it can be extended to non-deterministic programs, although this remains to be demonstrated.
+
+While these steps are important, they are all entirely illusory.
+There is no code for them, they are all just an idea of how to compile Curry programs.
+In a more substantial sense, I have developed a rewriting engine for FlatCurry programs.
+This engine is simple to use.  An optimization can be represented as a function from \texttt{Expr -> Expr}.
+The engine is also powerful enough to represent complicated optimizations such as inlining.
+For an example, A constant folding pass can be written with the code:
+\begin{verbatim}
+constFold e | pattern e "==" [lit a, lit b] = (boolc (a == b))
+ where a, b free
+constFold e | pattern e "+" [ilit a, ilit b] = (intc (a + b))
+ where a, b free
+...
+\end{verbatim}
+
+
+\subsection{Timeframe}
+
+There is still a substantial amount of work left to be done.
+I have broken down the remaining work into eight separate tasks with an expected time to completion.
+
+\begin{itemize}
+  \item build a naive compiler: 3 months
+  \item implement shortcutting: 2 months
+  \item prove correctness of shortcutting with non-determinism: 1 months
+  \item implement unboxing: 2 months
+  \item prove correctness of unboxing: 1 month
+  \item implement deforestation: 2 months
+  \item prove correctness of deforestation: 2 months
+  \item write dissertation: 9 months
+\end{itemize}
+
+I have tried to be overly pessimistic with this timeframe.
+This will be important if one section takes longer than I'm expecting.

@@ -3,46 +3,57 @@
 \pagestyle{plain}
 \usepackage{amsmath,amsfonts,amssymb,amsthm}
 \usepackage{qtree}
+\usepackage{cite}
+\usepackage{xspace}
+\usepackage[all]{xy}
+\usepackage{mdframed}
+
+\title{Cooking with Gas:\\Making an Optimizing Curry Compiler}
+\author{Steven Libby}
+
+\newcommand{\codefont}{\small\tt}
+\newcommand{\code}[1]{\mbox{\codefont{#1}}}
 
 \renewcommand{\H}{\mbox{\bf H}}
 \newcommand{\Hf}[1]{\mbox{\bf H$_{#1}$}}
 \newcommand\pp{+\kern-1.3ex+\kern0.8ex}
 \newcommand\mpp{\ensuremath{\mathbin{+\mkern-10mu+}}}
 \begin{document}
+\maketitle
 
 \begin{abstract}
-    \input{abstract}
+    \input{00_abstract}
 \end{abstract}
 
 \section{Introduction}
-\input{introduction}
+\input{01_introduction}
 
 \section{Curry Language}
-\input{language}
+\input{02_language}
 
 \section{Need for an Optimizing Compiler}
-\input{need}
+\input{03_need}
 
 \section{Functional Compilers}
-\input{functional}
+\input{04_functional}
 
 \section{Logic Compilers}
-\input{logic}
+\input{05_logic}
 
 \section{Functional Logic Compilers}
-\input{functionalLogic}
+\input{06_functionalLogic}
 
 \section{Compiling Curry}
-\input{compilingCurry}
+\input{07_compilingCurry}
 
 \section{Optimizations}
-\input{optimizations}
+\input{08_optimizations}
 
 \section{Deliverables}
-\input{deliverables}
+\input{09_deliverables}
 
 \section{Conclusion}
-\input{conclusion}
+\input{10_conclusion}
 
 
 \bibliographystyle{plain}
